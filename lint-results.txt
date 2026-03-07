@@ -1,0 +1,41 @@
+[0m[0m
+[0m[4mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\components\CustomPlayer.tsx[24m[0m
+[0m  [2m107:9[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')[0m
+[0m[0m
+[0m[4mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\components\Navbar.tsx[24m[0m
+[0m   [2m8:13[22m  [33mwarning[39m  'searchQuery' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m18:13[22m  [31merror[39m    Error: Calling setState synchronously within an effect can trigger cascading renders[0m
+[0m[0m
+[0mEffects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:[0m
+[0m* Update external systems with the latest state from React.[0m
+[0m* Subscribe for updates from some external system, calling setState in a callback function when external state changes.[0m
+[0m[0m
+[0mCalling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).[0m
+[0m[0m
+[0mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\components\Navbar.tsx:18:13[0m
+[0m  16 |         const query = inputValue.trim();[0m
+[0m  17 |         if (!query) {[0m
+[0m> 18 |             setSuggestions([]);[0m
+[0m     |             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect[0m
+[0m  19 |             return;[0m
+[0m  20 |         }[0m
+[0m  21 |  [2mreact-hooks/set-state-in-effect[22m[0m
+[0m[0m
+[0m[4mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\components\Sidebar.tsx[24m[0m
+[0m  [2m7:5[22m  [33mwarning[39m  'Search' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\components\VideoGrid.tsx[24m[0m
+[0m   [2m5:28[22m  [33mwarning[39m  'YouTubeAPIError' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m10:10[22m  [33mwarning[39m  'Flame' is defined but never used            [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m10:25[22m  [33mwarning[39m  'TrendingUp' is defined but never used       [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\GamezPark\.gemini\antigravity\scratch\streamify\lib\youtube.ts[24m[0m
+[0m   [2m70:43[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m81:40[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m82:49[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m86:57[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m109:21[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[31m[1m✖ 12 problems (6 errors, 6 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  0 errors and 1 warning potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

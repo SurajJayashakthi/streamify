@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import dynamic from 'next/dynamic';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
+import MobileDrawer from '@/components/MobileDrawer';
 
 import ClientPlayer from '@/components/ClientPlayer';
 const inter = Inter({
@@ -33,14 +34,15 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#09090b" />
       </head>
-      <body className="antialiased" style={{ background: '#09090b', color: '#fafafa' }}>
+      <body className="antialiased selection:bg-indigo-500/30">
         {/* Sidebar (desktop fixed left / mobile bottom nav) */}
         <Sidebar />
+        <MobileDrawer />
 
         {/* Main content offset by sidebar width on desktop */}
         <div
-          className="md:pl-[240px]"
-          style={{ paddingBottom: '140px' }} // 60px nav + 80px player roughly on mobile. Wait, actual Tailwind pb could be used, but inline style pb is fine. Let's use Tailwind classes: min-h-screen pb-[140px] md:pb-[80px]
+          className="md:pl-[240px] px-6"
+          style={{ paddingBottom: '140px' }}
         >
           {children}
         </div>

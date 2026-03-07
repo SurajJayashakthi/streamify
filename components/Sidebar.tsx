@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
     Home,
-    Search,
     Library,
     TrendingUp,
     Music2,
@@ -15,6 +14,7 @@ import {
     ListMusic,
     Zap,
 } from 'lucide-react';
+import { useVideoStore } from '@/store/useVideoStore';
 
 const navItems = [
     { label: 'Home', icon: Home, href: '/' },
@@ -32,45 +32,50 @@ const libraryItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const { setSearchQuery } = useVideoStore();
 
+    const handleNavClick = (query?: string) => {
+        if (query) {
+            setSearchQuery(query);
+        } else {
+            setSearchQuery('lofi music chill beats'); // Default Home
+        }
+    };
     return (
         <>
             {/* Desktop Sidebar */}
             <aside
-                className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 overflow-y-auto"
-                style={{ background: 'rgba(9,9,11,0.95)', borderRight: '1px solid rgba(168,85,247,0.12)' }}
+                className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 bg-black border-right border-zinc-800/40"
             >
-                {/* Logo */}
-                <div className="flex items-center gap-3 px-5 py-6 border-b border-white/5">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
-                        <Zap className="w-5 h-5 text-white" fill="white" />
-                    </div>
-                    <span className="text-xl font-bold text-white tracking-tight">
+                {/* Logo Section */}
+                <div className="flex items-center gap-3 px-8 py-8 h-12 border-b border-zinc-800/40">
+                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
+                    <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">
                         Streamify
                     </span>
                 </div>
 
                 {/* Main Nav */}
-                <nav className="flex flex-col gap-1 px-3 pt-4">
-                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2">Menu</p>
+                <nav className="flex flex-col gap-1 px-4 pt-6">
+                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] px-3 mb-3">Menu</p>
                     {navItems.map(({ label, icon: Icon, href }) => {
                         const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
                         return (
                             <Link
                                 key={label}
                                 href={href}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
-                                    ? 'bg-purple-500/20 text-purple-400'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                className={`flex items-center gap-4 px-8 py-3 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 group relative ${isActive
+                                    ? 'text-white'
+                                    : 'text-zinc-600 hover:text-white'
                                     }`}
                             >
                                 <Icon
-                                    className={`w-4.5 h-4.5 transition-colors ${isActive ? 'text-purple-400' : 'text-zinc-500 group-hover:text-white'}`}
-                                    size={18}
+                                    className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-white'}`}
+                                    strokeWidth={1.5}
                                 />
                                 {label}
                                 {isActive && (
-                                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-purple-500" />
+                                    <span className="absolute bottom-0 left-8 right-8 h-[2px] bg-violet-600 rounded-full" />
                                 )}
                             </Link>
                         );
@@ -78,40 +83,42 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Library Nav */}
-                <nav className="flex flex-col gap-1 px-3 pt-6">
-                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 mb-2">Library</p>
+                <nav className="flex flex-col gap-1 px-4 pt-8">
+                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] px-3 mb-3">Library</p>
                     {libraryItems.map(({ label, icon: Icon, href }) => (
                         <Link
                             key={label}
                             href={href}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-200 group"
+                            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[14px] font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 group"
                         >
-                            <Icon className="w-4.5 h-4.5 text-zinc-500 group-hover:text-white transition-colors" size={18} />
+                            <Icon className="w-4.5 h-4.5 text-zinc-500 group-hover:text-white transition-colors" strokeWidth={1.5} />
                             {label}
                         </Link>
                     ))}
                 </nav>
 
-                {/* Bottom promo */}
-                <div className="mt-auto mx-3 mb-4 p-4 rounded-xl" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(124,58,237,0.1))', border: '1px solid rgba(168,85,247,0.2)' }}>
-                    <p className="text-xs font-semibold text-purple-300 mb-1">✨ Go Premium</p>
-                    <p className="text-xs text-zinc-500">Unlimited streams, no ads.</p>
+                {/* Premium Promo */}
+                <div className="mt-auto mx-6 mb-6 p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800">
+                    <p className="text-[10px] font-black text-violet-500 mb-1 uppercase tracking-widest">Upgrade</p>
+                    <p className="text-[10px] text-zinc-600 leading-relaxed font-medium">Access ad-free streaming & spatial audio.</p>
                 </div>
             </aside>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 py-2 bg-zinc-950/95 backdrop-blur-xl border-t border-purple-500/15 h-[60px] pb-safe">
+            <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50 flex justify-around items-center px-6 py-2 bg-zinc-950/80 backdrop-blur-2xl border border-white/5 h-[64px] rounded-3xl shadow-2xl overflow-hidden">
                 {[
-                    { label: 'Home', icon: Home, href: '/' },
-                    { label: 'Search', icon: Search, href: '/?q=trending' }, // Placeholder for search focus
-                    { label: 'Library', icon: Library, href: '/?q=playlists' },
-                ].map(({ label, icon: Icon, href }) => {
-                    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                    { label: 'Home', icon: Home, query: '' },
+                    { label: 'Library', icon: Library, query: '__FAVORITES__' },
+                ].map(({ label, icon: Icon, query }) => {
+                    const href = query ? `/?q=${query}` : '/';
+                    const isActive = pathname === href || (href !== '/' && pathname.includes(query));
                     return (
                         <Link key={label} href={href}
-                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-300 ${isActive ? 'text-purple-400' : 'text-zinc-500 hover:text-zinc-300'}`}>
-                            <Icon size={22} className={isActive ? 'drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]' : ''} />
-                            <span className="text-[10px] font-medium tracking-wide">{label}</span>
+                            onClick={() => handleNavClick(query)}
+                            className={`flex flex-col items-center gap-2 p-2 transition-all duration-500 w-16 group relative ${isActive ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                            <Icon size={18} strokeWidth={1.5} className={isActive ? 'text-white' : ''} />
+                            <span className="text-[9px] font-black tracking-widest uppercase opacity-70">{label}</span>
+                            {isActive && <span className="absolute bottom-1 w-4 h-[2px] bg-violet-600 rounded-full" />}
                         </Link>
                     );
                 })}

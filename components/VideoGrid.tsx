@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useVideoStore } from '@/store/useVideoStore';
-import { getYouTubeVideos, YouTubeAPIError } from '@/lib/youtube';
+import { getYouTubeVideos } from '@/lib/youtube';
 import { YouTubeVideo } from '@/store/useVideoStore';
 import VideoCard from './VideoCard';
 import SkeletonCard from './SkeletonCard';
 import ErrorBanner from './ErrorBanner';
-import { Flame, Music2, TrendingUp } from 'lucide-react';
+import { Music2 } from 'lucide-react';
 
 const SKELETON_COUNT = 12;
 
@@ -23,7 +23,7 @@ const categoryTags = [
 ];
 
 export default function VideoGrid() {
-    const { searchQuery, setSearchQuery } = useVideoStore();
+    const { searchQuery, setSearchQuery, favorites } = useVideoStore();
     const [videos, setVideos] = useState<YouTubeVideo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
@@ -32,6 +32,13 @@ export default function VideoGrid() {
     const fetchVideos = useCallback(async (query: string) => {
         setLoading(true);
         setError(null);
+
+        if (query === '__FAVORITES__') {
+            setVideos(favorites);
+            setLoading(false);
+            return;
+        }
+
         try {
             const results = await getYouTubeVideos(query);
             setVideos(results);
@@ -40,7 +47,7 @@ export default function VideoGrid() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [favorites]);
 
     useEffect(() => {
         fetchVideos(searchQuery);
@@ -54,33 +61,29 @@ export default function VideoGrid() {
     return (
         <div className="flex flex-col gap-6">
             {/* Header */}
-            <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 rounded-full" style={{ background: 'linear-gradient(to bottom, #a855f7, #7c3aed)' }} />
-                    <h1 className="text-xl font-bold text-white">
-                        {searchQuery === 'lofi music chill beats' ? 'Discover Music' : `Results for "${searchQuery}"`}
-                    </h1>
-                </div>
-                <p className="text-sm text-zinc-500 ml-3">
-                    {loading ? 'Loading…' : `${videos.length} videos found`}
+            <div className="flex flex-col gap-2 mb-4">
+                <h1 className="text-[11px] font-black text-zinc-500 tracking-[0.3em] uppercase">
+                    {searchQuery === 'lofi music chill beats'
+                        ? 'Suggested'
+                        : searchQuery === '__FAVORITES__'
+                            ? 'Library'
+                            : searchQuery}
+                </h1>
+                <p className="text-xs text-zinc-600 font-medium">
+                    Curated selection for you.
                 </p>
             </div>
 
-            {/* Category chips */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none px-1">
+            {/* Category Tags */}
+            <div className="flex gap-2.5 overflow-x-auto pb-4 pt-4 no-scrollbar">
                 {categoryTags.map((tag) => (
                     <button
                         key={tag.label}
                         onClick={() => handleTagClick(tag)}
-                        className="shrink-0 px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-200 whitespace-nowrap"
-                        style={{
-                            background: activeTag === tag.label
-                                ? 'linear-gradient(135deg, #a855f7, #7c3aed)'
-                                : 'rgba(255,255,255,0.06)',
-                            color: activeTag === tag.label ? '#fff' : '#a1a1aa',
-                            border: activeTag === tag.label ? 'none' : '1px solid rgba(255,255,255,0.08)',
-                            boxShadow: activeTag === tag.label ? '0 2px 10px rgba(168,85,247,0.3)' : 'none'
-                        }}
+                        className={`px-6 py-2 rounded-full text-[10px] font-black tracking-[0.15em] uppercase transition-all duration-500 whitespace-nowrap border ${activeTag === tag.label
+                            ? 'bg-zinc-800 text-white border-zinc-700'
+                            : 'bg-transparent text-zinc-600 border-zinc-900/50 hover:border-zinc-800 hover:text-zinc-400'
+                            }`}
                     >
                         {tag.label}
                     </button>

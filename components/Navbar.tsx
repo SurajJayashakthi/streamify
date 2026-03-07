@@ -1,86 +1,139 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Search, Bell, User, Sparkles } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Search, Bell, User, Sparkles, Menu } from 'lucide-react';
 import { useVideoStore } from '@/store/useVideoStore';
 
 export default function Navbar() {
-    const { searchQuery, setSearchQuery } = useVideoStore();
+    const { searchQuery, setSearchQuery, setIsDrawerOpen } = useVideoStore();
     const [inputValue, setInputValue] = useState('');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const suggestRef = useRef<HTMLDivElement>(null);
+
+    // Debounce suggestions
+    useEffect(() => {
+        const query = inputValue.trim();
+        if (!query) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setSuggestions([]);
+            return;
+        }
+
+        const timeoutId = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/suggest?q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                setSuggestions(data.suggestions || []);
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+        return () => clearTimeout(timeoutId);
+    }, [inputValue]);
+
+    // Close suggestions on outside click
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (suggestRef.current && !suggestRef.current.contains(e.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter' && inputValue.trim()) {
                 setSearchQuery(inputValue.trim());
+                setShowSuggestions(false);
             }
         },
         [inputValue, setSearchQuery]
     );
 
-    return (
-        <header
-            className="fixed top-0 right-0 z-30 flex items-center gap-4 px-5 py-3"
-            style={{
-                left: 0,
-                background: 'rgba(9,9,11,0.9)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
-                height: '64px',
-            }}
-        >
-            {/* Left spacer for sidebar on desktop */}
-            <div className="hidden md:block w-[240px] shrink-0" />
+    const handleSuggestClick = (suggestion: string) => {
+        setInputValue(suggestion);
+        setSearchQuery(suggestion);
+        setShowSuggestions(false);
+    };
 
-            {/* Logo on mobile */}
-            <div className="md:hidden flex items-center gap-2 mr-1 sm:mr-2">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
-                    <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+    <header
+        className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 py-2 h-12"
+        style={{
+            background: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(40px)',
+            borderBottom: '1px solid rgba(39, 39, 42, 0.4)',
+        }}
+    >
+        {/* Logo/Hamburger */}
+        <div className="flex items-center gap-6">
+            <button
+                onClick={() => setIsDrawerOpen(true)}
+                className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
+                aria-label="Open menu"
+            >
+                <Menu size={18} strokeWidth={1.5} />
+            </button>
+            <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
+                <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">Streamify</span>
+            </div>
+        </div>
+
+        {/* Search bar centered */}
+        <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-md hidden sm:block relative group px-6" ref={suggestRef}>
+            <Search
+                className="absolute left-10 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-white transition-colors pointer-events-none"
+                size={14}
+                strokeWidth={1.5}
+            />
+            <input
+                type="text"
+                placeholder="Search music..."
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onKeyDown={handleKeyDown}
+                className="w-full pl-10 pr-5 py-1.5 text-[11px] text-white placeholder-zinc-600 rounded-full outline-none transition-all duration-500 bg-transparent border border-zinc-800 hover:border-zinc-700 focus:border-white/20"
+                aria-label="Search videos"
+            />
+
+            {/* Search Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-3 py-2 rounded-2xl border border-white/5 shadow-2xl overflow-hidden z-50 backdrop-blur-3xl"
+                    style={{ background: 'rgba(9, 9, 11, 0.9)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                    {suggestions.map((suggestion, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => handleSuggestClick(suggestion)}
+                            className="w-full flex items-center gap-4 px-5 py-2.5 text-left hover:bg-white/5 transition-colors focus:outline-none focus:bg-indigo-500/10"
+                        >
+                            <Search size={14} className="text-zinc-500 shrink-0" strokeWidth={1.5} />
+                            <span className="text-[13px] text-zinc-300 truncate font-medium">{suggestion}</span>
+                        </button>
+                    ))}
                 </div>
-                <span className="text-sm sm:text-base font-bold text-white shrink-0 hidden xs:inline-block">Streamify</span>
-            </div>
+            )}
+        </div>
 
-            {/* Search bar */}
-            <div className="flex-1 max-w-xl min-w-[120px] sm:min-w-[200px] relative">
-                <Search
-                    className="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
-                    size={16}
-                />
-                <input
-                    type="text"
-                    placeholder="Search…"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 rounded-full sm:rounded-xl outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/50 bg-white/5 border border-white/10 hover:border-white/20"
-                    aria-label="Search videos"
-                />
-                {inputValue && (
-                    <button
-                        onClick={() => { setSearchQuery(inputValue.trim()); }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-purple-400 hover:text-purple-300 transition-colors"
-                    >
-                        Go
-                    </button>
-                )}
-            </div>
-
-            {/* Right actions */}
-            <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
-                <button
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-zinc-400 hover:text-white transition-all hover:bg-white/10"
-                    aria-label="Notifications"
-                >
-                    <Bell size={18} />
-                </button>
-                <button
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white transition-all"
-                    style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}
-                    aria-label="User profile"
-                >
-                    <User size={15} />
-                </button>
-            </div>
-        </header>
+        {/* Right Tools */}
+        <div className="flex items-center gap-6">
+            <button
+                className="relative p-2 text-zinc-500 hover:text-white transition-all group"
+                aria-label="Notifications"
+            >
+                <Bell size={16} strokeWidth={1.5} />
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-violet-500 transition-all group-hover:w-3" />
+            </button>
+            <button
+                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
+                aria-label="User profile"
+            >
+                <User size={14} strokeWidth={1.5} />
+            </button>
+        </div>
+    </header>
     );
 }

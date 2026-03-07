@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-zinc-950: #09090b;
-  --color-purple-500: #a855f7;
-  --color-purple-400: #c084fc;
-  --color-purple-600: #9333ea;
+  --color-zinc-950: #050507;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
 }
 
 :root {
@@ -20,52 +21,87 @@
 
 html,
 body {
-  background-color: #09090b;
+  background: #000000;
   color: #fafafa;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
   height: 100%;
   overflow: hidden;
+  letter-spacing: -0.012em;
+}
+
+h1,
+h2,
+h3,
+h4,
+.heading {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #18181b;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #a855f7;
+  background: rgba(239, 68, 68, 0.3);
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #c084fc;
+  background: rgba(239, 68, 68, 0.5);
+}
+
+/* Minimalist borders */
+.border-thin {
+  border: 1px solid rgba(39, 39, 42, 0.4);
+  /* zinc-800/40 */
 }
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 0.5px solid rgba(255, 255, 255, 0.04);
 }
 
 .glass-dark {
-  background: rgba(9, 9, 11, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(168, 85, 247, 0.2);
+  background: rgba(9, 9, 11, 0.6);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-top: 0.5px solid rgba(239, 68, 68, 0.1);
 }
 
-/* Purple glow */
-.glow-purple {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+/* Red glow */
+.glow-accent {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.05);
 }
 
 /* Skeleton pulse animation */
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .skeleton {
@@ -79,4 +115,13 @@ body {
 .main-scroll {
   overflow-y: auto;
   height: calc(100vh - var(--player-height));
+  padding-left: 1.5rem;
+  /* px-6 */
+  padding-right: 1.5rem;
+  /* px-6 */
+}
+
+.layout-padding {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
