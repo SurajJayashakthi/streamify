@@ -59,81 +59,82 @@ export default function Navbar() {
         setShowSuggestions(false);
     };
 
-    <header
-        className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 py-2 h-12"
-        style={{
-            background: 'rgba(0, 0, 0, 0.8)',
-            backdropFilter: 'blur(40px)',
-            borderBottom: '1px solid rgba(39, 39, 42, 0.4)',
-        }}
-    >
-        {/* Logo/Hamburger */}
-        <div className="flex items-center gap-6">
-            <button
-                onClick={() => setIsDrawerOpen(true)}
-                className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
-                aria-label="Open menu"
-            >
-                <Menu size={18} strokeWidth={1.5} />
-            </button>
-            <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
-                <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">Streamify</span>
-            </div>
-        </div>
-
-        {/* Search bar centered */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-md hidden sm:block relative group px-6" ref={suggestRef}>
-            <Search
-                className="absolute left-10 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-white transition-colors pointer-events-none"
-                size={14}
-                strokeWidth={1.5}
-            />
-            <input
-                type="text"
-                placeholder="Search music..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onFocus={() => setShowSuggestions(true)}
-                onKeyDown={handleKeyDown}
-                className="w-full pl-10 pr-5 py-1.5 text-[11px] text-white placeholder-zinc-600 rounded-full outline-none transition-all duration-500 bg-transparent border border-zinc-800 hover:border-zinc-700 focus:border-white/20"
-                aria-label="Search videos"
-            />
-
-            {/* Search Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-3 py-2 rounded-2xl border border-white/5 shadow-2xl overflow-hidden z-50 backdrop-blur-3xl"
-                    style={{ background: 'rgba(9, 9, 11, 0.9)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-                    {suggestions.map((suggestion, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => handleSuggestClick(suggestion)}
-                            className="w-full flex items-center gap-4 px-5 py-2.5 text-left hover:bg-white/5 transition-colors focus:outline-none focus:bg-indigo-500/10"
-                        >
-                            <Search size={14} className="text-zinc-500 shrink-0" strokeWidth={1.5} />
-                            <span className="text-[13px] text-zinc-300 truncate font-medium">{suggestion}</span>
-                        </button>
-                    ))}
+    return (
+        <header
+            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 py-2 h-12"
+            style={{
+                background: 'rgba(0, 0, 0, 0.8)',
+                backdropFilter: 'blur(40px)',
+                borderBottom: '1px solid rgba(39, 39, 42, 0.4)',
+            }}
+        >
+            {/* Logo/Hamburger */}
+            <div className="flex items-center gap-6">
+                <button
+                    onClick={() => setIsDrawerOpen(true)}
+                    className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
+                    aria-label="Open menu"
+                >
+                    <Menu size={18} strokeWidth={1.5} />
+                </button>
+                <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
+                    <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">Streamify</span>
                 </div>
-            )}
-        </div>
+            </div>
 
-        {/* Right Tools */}
-        <div className="flex items-center gap-6">
-            <button
-                className="relative p-2 text-zinc-500 hover:text-white transition-all group"
-                aria-label="Notifications"
-            >
-                <Bell size={16} strokeWidth={1.5} />
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-violet-500 transition-all group-hover:w-3" />
-            </button>
-            <button
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
-                aria-label="User profile"
-            >
-                <User size={14} strokeWidth={1.5} />
-            </button>
-        </div>
-    </header>
+            {/* Search bar centered */}
+            <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-md hidden sm:block relative group px-6" ref={suggestRef}>
+                <Search
+                    className="absolute left-10 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-white transition-colors pointer-events-none"
+                    size={14}
+                    strokeWidth={1.5}
+                />
+                <input
+                    type="text"
+                    placeholder="Search music..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full pl-10 pr-5 py-1.5 text-[11px] text-white placeholder-zinc-600 rounded-full outline-none transition-all duration-500 bg-transparent border border-zinc-800 hover:border-zinc-700 focus:border-white/20"
+                    aria-label="Search videos"
+                />
+
+                {/* Search Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-3 py-2 rounded-2xl border border-white/5 shadow-2xl overflow-hidden z-50 backdrop-blur-3xl"
+                        style={{ background: 'rgba(9, 9, 11, 0.9)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                        {suggestions.map((suggestion, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleSuggestClick(suggestion)}
+                                className="w-full flex items-center gap-4 px-5 py-2.5 text-left hover:bg-white/5 transition-colors focus:outline-none focus:bg-indigo-500/10"
+                            >
+                                <Search size={14} className="text-zinc-500 shrink-0" strokeWidth={1.5} />
+                                <span className="text-[13px] text-zinc-300 truncate font-medium">{suggestion}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Right Tools */}
+            <div className="flex items-center gap-6">
+                <button
+                    className="relative p-2 text-zinc-500 hover:text-white transition-all group"
+                    aria-label="Notifications"
+                >
+                    <Bell size={16} strokeWidth={1.5} />
+                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-violet-500 transition-all group-hover:w-3" />
+                </button>
+                <button
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
+                    aria-label="User profile"
+                >
+                    <User size={14} strokeWidth={1.5} />
+                </button>
+            </div>
+        </header>
     );
 }

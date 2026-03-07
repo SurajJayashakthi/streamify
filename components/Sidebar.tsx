@@ -13,6 +13,7 @@ import {
     Podcast,
     ListMusic,
     Zap,
+    Sparkles,
 } from 'lucide-react';
 import { useVideoStore } from '@/store/useVideoStore';
 
