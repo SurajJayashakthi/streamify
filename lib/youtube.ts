@@ -173,7 +173,7 @@ export function getPersonalizedQuery(): string {
 
         allVideos.forEach(v => {
             const words = v.title.toLowerCase().split(/[^a-z0-9]+/);
-            words.forEach(word => {
+            words.forEach((word: string) => {
                 if (word.length > 2 && !stopWords.has(word)) {
                     keywords[word] = (keywords[word] || 0) + 1;
                 }

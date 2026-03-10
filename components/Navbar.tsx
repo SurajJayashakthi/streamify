@@ -82,11 +82,11 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Search bar centered */}
-            <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-lg hidden md:block relative group" ref={suggestRef}>
+            {/* Search bar centered - visible on mobile now */}
+            <div className="absolute left-1/2 -translate-x-1/2 w-[calc(100%-160px)] md:w-full max-w-lg group relative" ref={suggestRef}>
                 <Search
-                    className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors pointer-events-none"
-                    size={18}
+                    className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors pointer-events-none"
+                    size={16}
                     strokeWidth={2}
                 />
                 <input
@@ -96,7 +96,7 @@ export default function Navbar() {
                     onChange={(e) => setInputValue(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-14 pr-6 py-3 text-sm text-white placeholder-zinc-500 rounded-full outline-none transition-all duration-500 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 focus:border-white/20 backdrop-blur-md"
+                    className="w-full pl-10 md:pl-14 pr-4 md:pr-6 py-2 md:py-3 text-xs md:text-sm text-white placeholder-zinc-500 rounded-full outline-none transition-all duration-500 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 focus:border-white/20 backdrop-blur-md"
                     aria-label="Search videos"
                 />
 
