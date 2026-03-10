@@ -27,6 +27,7 @@ export default function CustomPlayer() {
 
     const playerRef = useRef<any>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const silentAudioRef = useRef<HTMLAudioElement | null>(null);
 
     // Single Persistent Player Logic
     const onReady = useCallback((event: any) => {
@@ -58,8 +59,17 @@ export default function CustomPlayer() {
             if (autoPlay && relatedVideos.length > 0) {
                 setCountdown(3);
             }
-        } else if (state === 1) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'none';
+            }
+            if (silentAudioRef.current) silentAudioRef.current.pause();
+        } else if (state === 1) { // PLAYING
             setCountdown(null);
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
+            if (silentAudioRef.current) silentAudioRef.current.play().catch(() => { });
+
             // Start 500ms sync interval when playing
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = setInterval(() => {
@@ -67,6 +77,12 @@ export default function CustomPlayer() {
                     setCurrentTime(playerRef.current.getCurrentTime());
                 }
             }, 500);
+        } else if (state === 2) { // PAUSED
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
+            }
+            if (silentAudioRef.current) silentAudioRef.current.pause();
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
         } else {
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
         }
@@ -107,15 +123,72 @@ export default function CustomPlayer() {
         return () => clearInterval(saveInterval);
     }, [activeVideo, isPlaying]);
 
+    // Handle browser back button (popstate)
     useEffect(() => {
-        const handleVisibility = () => {
-            if (document.hidden && isPlaying && playerRef.current) {
-                playerRef.current.playVideo();
+        if (!isPlayerOpen) return;
+
+        // Push a state when the player opens so "Back" can close/minimize it
+        if (!isMinimized) {
+            window.history.pushState({ playerOpen: true }, '');
+        }
+
+        const handlePopState = (event: PopStateEvent) => {
+            if (!isMinimized) {
+                event.preventDefault();
+                setIsMinimized(true);
             }
         };
-        document.addEventListener('visibilitychange', handleVisibility);
-        return () => document.removeEventListener('visibilitychange', handleVisibility);
-    }, [isPlaying]);
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [isPlayerOpen, isMinimized, setIsMinimized]);
+
+    // Media Session & Silent Audio Hack
+    useEffect(() => {
+        if (!activeVideo) return;
+
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: decodeHTML(activeVideo.title),
+                artist: activeVideo.channelTitle,
+                album: 'Streamify',
+                artwork: [
+                    { src: activeVideo.thumbnail, sizes: '512x512', type: 'image/jpg' },
+                ],
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => {
+                playerRef.current?.playVideo();
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                playerRef.current?.pauseVideo();
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                // Implement if track list exists
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (relatedVideos.length > 0) setActiveVideo(relatedVideos[0]);
+            });
+        }
+
+        // Silent Audio Loop Trick
+        if (!silentAudioRef.current) {
+            const audio = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); // Fallback or a tiny silent mp3 link
+            audio.loop = true;
+            audio.volume = 0; // Silent
+            silentAudioRef.current = audio;
+        }
+
+        return () => {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = null;
+            }
+            if (silentAudioRef.current) {
+                silentAudioRef.current.pause();
+                silentAudioRef.current = null;
+            }
+        };
+    }, [activeVideo, relatedVideos, setActiveVideo]);
 
     // Countdown logic
     useEffect(() => {
@@ -143,6 +216,7 @@ export default function CustomPlayer() {
             modestbranding: 1,
             rel: 0,
             playsinline: 1,
+            enablejsapi: 1,
             origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
     };
