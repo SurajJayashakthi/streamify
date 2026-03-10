@@ -41,7 +41,7 @@ export default function RootLayout({
 
         {/* Main content offset by sidebar width on desktop */}
         <div
-          className="md:pl-[240px] px-6"
+          className="md:pl-[240px] px-8"
           style={{ paddingBottom: '140px' }}
         >
           {children}

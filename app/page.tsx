@@ -12,7 +12,7 @@ export default function HomePage() {
 
       {/* Scrollable content below the 64px navbar */}
       <main
-        className="pt-[64px] px-8 md:px-12 py-10 md:py-16 min-h-screen"
+        className="pt-[64px] px-8 py-10 md:py-16 min-h-screen"
       >
         <div className="max-w-[2000px] mx-auto flex flex-col gap-y-10">
           <ContinueWatching />

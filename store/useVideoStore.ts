@@ -17,12 +17,16 @@ interface VideoStore {
   isMinimized: boolean;
   isDrawerOpen: boolean;
   favorites: YouTubeVideo[];
+  autoPlay: boolean;
+  nextPageToken: string | null;
   setActiveVideo: (video: YouTubeVideo) => void;
   setSearchQuery: (query: string) => void;
   setIsPlayerOpen: (open: boolean) => void;
   setIsMinimized: (minimized: boolean) => void;
   setIsDrawerOpen: (open: boolean) => void;
   toggleFavorite: (video: YouTubeVideo) => void;
+  setAutoPlay: (autoPlay: boolean) => void;
+  setNextPageToken: (token: string | null) => void;
 }
 
 export const useVideoStore = create<VideoStore>((set) => ({
@@ -32,6 +36,8 @@ export const useVideoStore = create<VideoStore>((set) => ({
   isMinimized: false,
   isDrawerOpen: false,
   favorites: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('streamify_favorites') || '[]') : [],
+  autoPlay: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('streamify_autoplay') || 'true') : true,
+  nextPageToken: null,
   setActiveVideo: (video) => set({ activeVideo: video, isPlayerOpen: true, isMinimized: false }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setIsPlayerOpen: (open) => set({ isPlayerOpen: open }),
@@ -48,4 +54,11 @@ export const useVideoStore = create<VideoStore>((set) => ({
     }
     return { favorites: newFavorites };
   }),
+  setAutoPlay: (autoPlay) => set((state) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('streamify_autoplay', JSON.stringify(autoPlay));
+    }
+    return { autoPlay };
+  }),
+  setNextPageToken: (token) => set({ nextPageToken: token }),
 }));

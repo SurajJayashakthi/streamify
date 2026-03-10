@@ -7,20 +7,23 @@ import {
     Play, Pause, SkipBack, SkipForward,
     Volume2, VolumeX, X, Maximize2, ChevronDown, User, FileText
 } from 'lucide-react';
-import { useVideoStore } from '@/store/useVideoStore';
+import { useVideoStore, YouTubeVideo } from '@/store/useVideoStore';
 import { saveVideoProgress, getVideoProgress } from '@/lib/progress';
 import { decodeHTML } from '@/lib/utils';
+import { getRelatedVideos } from '@/lib/youtube';
 
 // Dynamically import react-youtube
 const YouTube = dynamic(() => import('react-youtube'), { ssr: false });
 
 export default function CustomPlayer() {
-    const { activeVideo, isPlayerOpen, setIsPlayerOpen, isMinimized, setIsMinimized } = useVideoStore();
+    const { activeVideo, setActiveVideo, isPlayerOpen, setIsPlayerOpen, isMinimized, setIsMinimized, autoPlay, setAutoPlay } = useVideoStore();
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isMuted, setIsMuted] = useState(false);
     const [playerError, setPlayerError] = useState(false);
+    const [relatedVideos, setRelatedVideos] = useState<YouTubeVideo[]>([]);
+    const [countdown, setCountdown] = useState<number | null>(null);
 
     const playerRef = useRef<any>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -30,6 +33,11 @@ export default function CustomPlayer() {
         playerRef.current = event.target;
         setPlayerError(false);
         setDuration(event.target.getDuration());
+
+        // Fetch related videos
+        if (activeVideo) {
+            getRelatedVideos(activeVideo.id).then(setRelatedVideos);
+        }
 
         // Auto-Resume
         if (activeVideo) {
@@ -46,7 +54,12 @@ export default function CustomPlayer() {
         const state = event.data;
         setIsPlaying(state === 1);
 
-        if (state === 1) {
+        if (state === 0) { // ENDED
+            if (autoPlay && relatedVideos.length > 0) {
+                setCountdown(3);
+            }
+        } else if (state === 1) {
+            setCountdown(null);
             // Start 500ms sync interval when playing
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = setInterval(() => {
@@ -57,7 +70,7 @@ export default function CustomPlayer() {
         } else {
             if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
         }
-    }, []);
+    }, [autoPlay, relatedVideos]);
 
     const togglePlay = () => {
         if (!playerRef.current) return;
@@ -104,6 +117,21 @@ export default function CustomPlayer() {
         return () => document.removeEventListener('visibilitychange', handleVisibility);
     }, [isPlaying]);
 
+    // Countdown logic
+    useEffect(() => {
+        if (countdown === null) return;
+        if (countdown === 0) {
+            if (relatedVideos.length > 0) {
+                setActiveVideo(relatedVideos[0]);
+                setCountdown(null);
+            }
+            return;
+        }
+
+        const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, relatedVideos, setActiveVideo]);
+
     if (!isPlayerOpen || !activeVideo) return null;
 
     const opts = {
@@ -134,7 +162,15 @@ export default function CustomPlayer() {
                     >
                         <ChevronDown size={32} strokeWidth={1.5} />
                     </button>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Now Playing</p>
+                    <div className="flex items-center gap-4">
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Auto-Play</p>
+                        <button
+                            onClick={() => setAutoPlay(!autoPlay)}
+                            className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${autoPlay ? 'bg-[#8b5cf6]' : 'bg-zinc-700'}`}
+                        >
+                            <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-300 ${autoPlay ? 'left-6' : 'left-1'}`} />
+                        </button>
+                    </div>
                     <button onClick={() => setIsPlayerOpen(false)} className="p-3 text-zinc-400 hover:text-white">
                         <X size={28} strokeWidth={1.5} />
                     </button>
@@ -151,9 +187,21 @@ export default function CustomPlayer() {
                             onStateChange={onStateChange}
                             className={`w-full h-full transition-opacity duration-500 ${isMinimized ? 'opacity-0' : 'opacity-100'}`}
                         />
-                        {!isPlaying && (
+                        {!isPlaying && !countdown && (
                             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center pointer-events-none transition-all">
                                 <Play size={80} fill="white" className="text-white opacity-40" />
+                            </div>
+                        )}
+                        {countdown !== null && (
+                            <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center transition-all z-10">
+                                <p className="text-zinc-400 text-sm font-bold uppercase tracking-widest mb-4">Up Next in</p>
+                                <span className="text-7xl font-black text-white">{countdown}</span>
+                                <button
+                                    onClick={() => setCountdown(null)}
+                                    className="mt-8 px-6 py-2 rounded-full border border-white/10 text-xs font-bold text-white hover:bg-white/5 transition-all"
+                                >
+                                    Cancel
+                                </button>
                             </div>
                         )}
                     </div>
@@ -163,6 +211,34 @@ export default function CustomPlayer() {
                             {decodeHTML(activeVideo.title)}
                         </h1>
                         <p className="text-lg font-medium text-zinc-400 mt-4">{activeVideo.channelTitle}</p>
+                    </div>
+
+                    {/* Up Next Rail */}
+                    <div className="mt-10 w-full">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Up Next</h3>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            {relatedVideos.slice(0, 5).map((v) => (
+                                <button
+                                    key={v.id}
+                                    onClick={() => setActiveVideo(v)}
+                                    className="flex gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all text-left group"
+                                >
+                                    <div className="w-24 aspect-video rounded-lg overflow-hidden relative shrink-0">
+                                        <Image src={v.thumbnail} alt={v.title} fill className="object-cover" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-white truncate group-hover:text-[#8b5cf6] transition-colors">
+                                            {decodeHTML(v.title)}
+                                        </h4>
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
+                                            {v.channelTitle}
+                                        </p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Lyrics */}

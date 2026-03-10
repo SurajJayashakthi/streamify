@@ -114,10 +114,10 @@ h4,
 .main-scroll {
   overflow-y: auto;
   height: calc(100vh - var(--player-height));
-  padding-left: 1.5rem;
-  /* px-6 */
-  padding-right: 1.5rem;
-  /* px-6 */
+  padding-left: 2rem;
+  /* px-8 */
+  padding-right: 2rem;
+  /* px-8 */
 }
 
 .layout-padding {

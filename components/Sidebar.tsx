@@ -66,16 +66,16 @@ export default function Sidebar() {
                                 key={label}
                                 href={href}
                                 className={`flex items-center gap-6 px-6 py-4 rounded-xl text-sm font-semibold transition-all duration-500 group relative ${isActive
-                                    ? 'bg-white/5 text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]'
+                                    ? 'bg-white/5 text-[#8b5cf6] shadow-[inset_0_0_20px_rgba(139,92,246,0.05)]'
                                     : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-red-600 rounded-r-full shadow-[4px_0_15px_rgba(220,38,38,0.4)]" />
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#8b5cf6] rounded-r-full shadow-[4px_0_15px_rgba(139,92,246,0.4)]" />
                                 )}
                                 <Icon
-                                    className={`w-6 h-6 transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`}
-                                    strokeWidth={isActive ? 2 : 1.5}
+                                    className={`w-6 h-6 transition-colors ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-500 group-hover:text-white'}`}
+                                    strokeWidth={1.5}
                                 />
                                 {label}
                             </Link>
@@ -116,10 +116,10 @@ export default function Sidebar() {
                     return (
                         <Link key={label} href={href}
                             onClick={() => handleNavClick(query)}
-                            className={`flex flex-col items-center gap-2 p-2 transition-all duration-500 w-16 group relative ${isActive ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'}`}>
-                            <Icon size={18} strokeWidth={1.5} className={isActive ? 'text-white' : ''} />
+                            className={`flex flex-col items-center gap-2 p-2 transition-all duration-500 w-fit group relative ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                            <Icon size={24} strokeWidth={1.5} className={isActive ? 'text-[#8b5cf6]' : ''} />
                             <span className="text-[9px] font-black tracking-widest uppercase opacity-70">{label}</span>
-                            {isActive && <span className="absolute bottom-1 w-4 h-[2px] bg-violet-600 rounded-full" />}
+                            {isActive && <span className="absolute bottom-1 w-4 h-[2px] bg-[#8b5cf6] rounded-full" />}
                         </Link>
                     );
                 })}

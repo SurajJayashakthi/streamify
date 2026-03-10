@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useVideoStore } from '@/store/useVideoStore';
-import { getYouTubeVideos } from '@/lib/youtube';
+import { getYouTubeVideos, getPersonalizedQuery } from '@/lib/youtube';
 import { YouTubeVideo } from '@/store/useVideoStore';
 import VideoCard from './VideoCard';
 import SkeletonCard from './SkeletonCard';
@@ -23,35 +23,67 @@ const categoryTags = [
 ];
 
 export default function VideoGrid() {
-    const { searchQuery, setSearchQuery, favorites } = useVideoStore();
+    const { searchQuery, setSearchQuery, favorites, nextPageToken, setNextPageToken } = useVideoStore();
     const [videos, setVideos] = useState<YouTubeVideo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const [activeTag, setActiveTag] = useState('All');
+    const observer = useRef<IntersectionObserver | null>(null);
 
-    const fetchVideos = useCallback(async (query: string) => {
-        setLoading(true);
+    const fetchVideos = useCallback(async (query: string, isInitial = true) => {
+        if (isInitial) setLoading(true);
+        else setLoadingMore(true);
+
         setError(null);
 
         if (query === '__FAVORITES__') {
             setVideos(favorites);
             setLoading(false);
+            setLoadingMore(false);
             return;
         }
 
+        // Use personalized query for initial load if search is default
+        const finalQuery = (isInitial && query === 'lofi music chill beats') ? getPersonalizedQuery() : query;
+
         try {
-            const results = await getYouTubeVideos(query);
-            setVideos(results);
+            const { videos: newVideos, nextPageToken: newToken } = await getYouTubeVideos(
+                finalQuery,
+                20,
+                isInitial ? undefined : nextPageToken ?? undefined
+            );
+
+            if (isInitial) {
+                setVideos(newVideos);
+            } else {
+                setVideos(prev => [...prev, ...newVideos]);
+            }
+            setNextPageToken(newToken);
         } catch (err) {
             setError(err instanceof Error ? err : new Error(String(err)));
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    }, [favorites]);
+    }, [favorites, nextPageToken, setNextPageToken]);
 
     useEffect(() => {
-        fetchVideos(searchQuery);
-    }, [searchQuery, fetchVideos]);
+        fetchVideos(searchQuery, true);
+    }, [searchQuery]); // Removed fetchVideos to avoid recursive calls
+
+    const lastVideoRef = useCallback((node: HTMLDivElement | null) => {
+        if (loading || loadingMore) return;
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && nextPageToken && searchQuery !== '__FAVORITES__') {
+                fetchVideos(searchQuery, false);
+            }
+        });
+
+        if (node) observer.current.observe(node);
+    }, [loading, loadingMore, nextPageToken, searchQuery, fetchVideos]);
 
     const handleTagClick = (tag: { label: string; query: string }) => {
         setActiveTag(tag.label);
@@ -102,9 +134,20 @@ export default function VideoGrid() {
                         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
                             <SkeletonCard key={i} />
                         ))
-                        : videos.map((video) => (
-                            <VideoCard key={video.id} video={video} />
-                        ))}
+                        : videos.map((video, index) => {
+                            if (videos.length === index + 1) {
+                                return (
+                                    <div ref={lastVideoRef} key={video.id}>
+                                        <VideoCard video={video} />
+                                    </div>
+                                );
+                            } else {
+                                return <VideoCard key={video.id} video={video} />;
+                            }
+                        })}
+                    {loadingMore && Array.from({ length: 4 }).map((_, i) => (
+                        <SkeletonCard key={`more-${i}`} />
+                    ))}
                 </div>
             )}
 

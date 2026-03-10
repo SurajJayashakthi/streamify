@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { YouTubeVideo } from '@/store/useVideoStore';
 
+export interface YouTubeSearchResponse {
+    videos: YouTubeVideo[];
+    nextPageToken: string | null;
+}
+
 const BASE_URL = 'https://www.googleapis.com/youtube/v3';
 
 export class YouTubeAPIError extends Error {
@@ -37,7 +42,7 @@ function setCache(query: string, data: YouTubeVideo[]): void {
     } catch { }
 }
 
-export async function getYouTubeVideos(query: string, maxResults = 20): Promise<YouTubeVideo[]> {
+export async function getYouTubeVideos(query: string, maxResults = 20, pageToken?: string): Promise<YouTubeSearchResponse> {
     const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 
     if (!apiKey || apiKey === 'YOUR_YOUTUBE_API_KEY_HERE') {
@@ -47,9 +52,11 @@ export async function getYouTubeVideos(query: string, maxResults = 20): Promise<
         );
     }
 
-    // Return cached result if available
-    const cached = getFromCache(query);
-    if (cached) return cached;
+    // Return cached result if available (only for first page)
+    if (!pageToken) {
+        const cached = getFromCache(query);
+        if (cached) return { videos: cached, nextPageToken: null };
+    }
 
     try {
         // Step 1: Search for video IDs
@@ -61,11 +68,13 @@ export async function getYouTubeVideos(query: string, maxResults = 20): Promise<
                 maxResults,
                 videoCategoryId: '10', // Music category
                 key: apiKey,
+                pageToken,
             },
         });
 
         const items = searchResponse.data.items;
-        if (!items || items.length === 0) return [];
+        const nextPageToken = searchResponse.data.nextPageToken || null;
+        if (!items || items.length === 0) return { videos: [], nextPageToken: null };
 
         const videoIds = items.map((item: any) => item.id.videoId).join(',');
 
@@ -104,8 +113,10 @@ export async function getYouTubeVideos(query: string, maxResults = 20): Promise<
             };
         });
 
-        setCache(query, videos);
-        return videos;
+        if (!pageToken) {
+            setCache(query, videos);
+        }
+        return { videos, nextPageToken };
     } catch (error: any) {
         if (axios.isAxiosError(error)) {
             const status = error.response?.status;
@@ -144,4 +155,74 @@ export function formatPublishedAt(dateStr?: string): string {
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
     return `${Math.floor(diffDays / 365)} years ago`;
+}
+
+export function getPersonalizedQuery(): string {
+    if (typeof window === 'undefined') return 'Top Hits 2026';
+
+    try {
+        const favorites = JSON.parse(localStorage.getItem('streamify_favorites') || '[]');
+        const continueWatching = JSON.parse(localStorage.getItem('streamify_continue_watching') || '[]');
+
+        const allVideos = [...favorites, ...continueWatching];
+        if (allVideos.length === 0) return 'Top Hits 2026';
+
+        // Extract keywords from titles
+        const keywords: Record<string, number> = {};
+        const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'with', 'for', 'of', 'by', 'to', 'music', 'video', 'official', 'audio', 'lyrics', 'remix']);
+
+        allVideos.forEach(v => {
+            const words = v.title.toLowerCase().split(/[^a-z0-9]+/);
+            words.forEach(word => {
+                if (word.length > 2 && !stopWords.has(word)) {
+                    keywords[word] = (keywords[word] || 0) + 1;
+                }
+            });
+        });
+
+        const topKeywords = Object.entries(keywords)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(e => e[0]);
+
+        return topKeywords.length > 0 ? topKeywords.join(' ') : 'Top Hits 2026';
+    } catch {
+        return 'Top Hits 2026';
+    }
+}
+
+export async function getRelatedVideos(videoId: string): Promise<YouTubeVideo[]> {
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+    if (!apiKey) return [];
+
+    try {
+        const response = await axios.get(`${BASE_URL}/search`, {
+            params: {
+                part: 'snippet',
+                relatedToVideoId: videoId,
+                type: 'video',
+                maxResults: 10,
+                key: apiKey,
+            },
+        });
+
+        const items = response.data.items;
+        if (!items) return [];
+
+        return items.map((item: any) => ({
+            id: item.id.videoId,
+            title: item.snippet.title,
+            channelTitle: item.snippet.channelTitle,
+            thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.medium?.url,
+            publishedAt: item.snippet.publishedAt,
+        }));
+    } catch {
+        return [];
+    }
+}
+
+export function decodeHtmlEntities(text: string): string {
+    if (typeof window === 'undefined') return text;
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.documentElement.textContent || text;
 }
