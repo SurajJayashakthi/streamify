@@ -12,10 +12,9 @@ export default function HomePage() {
 
       {/* Scrollable content below the 64px navbar */}
       <main
-        className="main-scroll pt-[64px] px-2 sm:px-4 md:px-6 py-4 md:py-6 overflow-x-hidden"
-        style={{ minHeight: '100vh' }}
+        className="pt-[64px] px-8 md:px-12 py-10 md:py-16 min-h-screen"
       >
-        <div className="max-w-[2000px] mx-auto">
+        <div className="max-w-[2000px] mx-auto flex flex-col gap-y-10">
           <ContinueWatching />
           <VideoGrid />
         </div>

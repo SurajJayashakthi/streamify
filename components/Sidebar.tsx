@@ -49,50 +49,50 @@ export default function Sidebar() {
                 className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 bg-black border-right border-zinc-800/40"
             >
                 {/* Logo Section */}
-                <div className="flex items-center gap-3 px-8 py-8 h-12 border-b border-zinc-800/40">
-                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
-                    <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">
+                <div className="flex items-center gap-4 px-10 py-10 h-16">
+                    <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                    <span className="text-sm font-bold tracking-tight text-white leading-none">
                         Streamify
                     </span>
                 </div>
 
                 {/* Main Nav */}
-                <nav className="flex flex-col gap-1 px-4 pt-6">
-                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] px-3 mb-3">Menu</p>
+                <nav className="flex flex-col gap-6 px-4 pt-10">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-6 mb-2">Primary</p>
                     {navItems.map(({ label, icon: Icon, href }) => {
                         const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
                         return (
                             <Link
                                 key={label}
                                 href={href}
-                                className={`flex items-center gap-4 px-8 py-3 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 group relative ${isActive
-                                    ? 'text-white'
-                                    : 'text-zinc-600 hover:text-white'
+                                className={`flex items-center gap-6 px-6 py-4 rounded-xl text-sm font-semibold transition-all duration-500 group relative ${isActive
+                                    ? 'bg-white/5 text-white shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]'
+                                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
                                     }`}
                             >
+                                {isActive && (
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-red-600 rounded-r-full shadow-[4px_0_15px_rgba(220,38,38,0.4)]" />
+                                )}
                                 <Icon
-                                    className={`w-4 h-4 transition-colors ${isActive ? 'text-white' : 'text-zinc-600 group-hover:text-white'}`}
-                                    strokeWidth={1.5}
+                                    className={`w-6 h-6 transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`}
+                                    strokeWidth={isActive ? 2 : 1.5}
                                 />
                                 {label}
-                                {isActive && (
-                                    <span className="absolute bottom-0 left-8 right-8 h-[2px] bg-violet-600 rounded-full" />
-                                )}
                             </Link>
                         );
                     })}
                 </nav>
 
                 {/* Library Nav */}
-                <nav className="flex flex-col gap-1 px-4 pt-8">
-                    <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.1em] px-3 mb-3">Library</p>
+                <nav className="flex flex-col gap-6 px-4 pt-12">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-6 mb-2">Your Space</p>
                     {libraryItems.map(({ label, icon: Icon, href }) => (
                         <Link
                             key={label}
                             href={href}
-                            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[14px] font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300 group"
+                            className="flex items-center gap-6 px-6 py-4 rounded-xl text-sm font-semibold text-zinc-500 hover:text-white hover:bg-white/5 transition-all duration-500 group"
                         >
-                            <Icon className="w-4.5 h-4.5 text-zinc-500 group-hover:text-white transition-colors" strokeWidth={1.5} />
+                            <Icon className="w-6 h-6 text-zinc-500 group-hover:text-white transition-colors" strokeWidth={1.5} />
                             {label}
                         </Link>
                     ))}

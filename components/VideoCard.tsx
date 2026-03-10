@@ -52,14 +52,14 @@ export default function VideoCard({ video }: VideoCardProps) {
 
     return (
         <article
-            className="flex flex-col gap-3 cursor-pointer group"
+            className="flex flex-col gap-4 cursor-pointer group"
             onClick={() => setActiveVideo(video)}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* Thumbnail Container */}
             <div
-                className="relative aspect-video w-full overflow-hidden rounded-2xl cursor-pointer"
+                className="relative aspect-video w-full overflow-hidden rounded-2xl cursor-pointer bg-zinc-900"
                 onClick={() => setActiveVideo(video)}
             >
                 <Image
@@ -75,49 +75,48 @@ export default function VideoCard({ video }: VideoCardProps) {
                 <div
                     className="absolute inset-0 flex items-center justify-center transition-all duration-500"
                     style={{
-                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.4))',
+                        background: 'rgba(0,0,0,0.3)',
                         opacity: isHovered ? 1 : 0,
                     }}
                 >
                     <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-md"
+                        className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-xl"
                         style={{
-                            background: 'rgba(255,255,255,0.15)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.1)',
                             transform: isHovered ? 'scale(1)' : 'scale(0.8)',
                             transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                         }}
                     >
-                        <Play className="text-white ml-0.5" size={20} fill="white" />
+                        <Play className="text-white ml-0.5" size={24} fill="white" />
                     </div>
                 </div>
 
                 {/* Favorite Heart Button */}
                 <button
                     onClick={handleFavoriteClick}
-                    className="absolute top-3 right-3 p-2 rounded-full transition-all duration-300 backdrop-blur-xl"
+                    className="absolute top-4 right-4 p-2 rounded-full transition-all duration-300 backdrop-blur-xl"
                     style={{
-                        background: isFavorite ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
+                        background: isFavorite ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.2)',
                         border: '1px solid rgba(255,255,255,0.05)',
                         opacity: isFavorite || isHovered ? 1 : 0
                     }}
                     aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                 >
-                    <Heart size={14} fill={isFavorite ? '#6366f1' : 'transparent'} className={isFavorite ? 'text-indigo-400 scale-110' : 'text-white'} strokeWidth={isFavorite ? 2.5 : 1.5} />
+                    <Heart size={16} fill={isFavorite ? '#8b5cf6' : 'transparent'} className={isFavorite ? 'text-[#8b5cf6] scale-110' : 'text-white'} strokeWidth={isFavorite ? 2 : 1.5} />
                 </button>
 
                 {/* Duration badge */}
-                <div className="absolute bottom-3 right-3 px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-white/90 backdrop-blur-md border border-white/10"
+                <div className="absolute bottom-4 right-4 px-2 py-1 rounded-lg text-[10px] font-bold text-white/90 backdrop-blur-md border border-white/10"
                     style={{ background: 'rgba(9, 9, 11, 0.6)' }}>
                     14:02
                 </div>
 
-                {/* Progress Bar (1px Thin Red) */}
+                {/* Progress Bar (2px YouTube Red) */}
                 {progressPercent > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/10">
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/10">
                         <div
-                            className="h-full bg-[#FF0000]"
+                            className="h-full bg-red-600"
                             style={{ width: `${progressPercent}%` }}
                         />
                     </div>
@@ -125,33 +124,33 @@ export default function VideoCard({ video }: VideoCardProps) {
             </div>
 
             {/* Content info */}
-            <div className="flex gap-3 px-1">
-                <div className="hidden sm:block w-8 h-8 rounded-full bg-zinc-800 shrink-0 overflow-hidden border border-white/5">
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
-                        <User size={14} className="text-zinc-500" />
+            <div className="flex gap-4 px-1">
+                <div className="hidden sm:block w-10 h-10 rounded-full bg-zinc-900 shrink-0 overflow-hidden border border-white/5">
+                    <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-black flex items-center justify-center">
+                        <User size={18} className="text-zinc-500" />
                     </div>
                 </div>
                 <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <h3
-                        className="text-[13px] font-medium text-white/90 leading-snug line-clamp-2 hover:text-red-500 transition-colors cursor-pointer"
+                        className="text-lg font-semibold text-white leading-tight tracking-tight line-clamp-2 hover:text-red-500 transition-colors cursor-pointer"
                         title={decodedTitle}
                         onClick={() => setActiveVideo(video)}
                     >
                         {decodedTitle}
                     </h3>
-                    <div className="flex flex-col gap-0.5">
-                        <p className="text-zinc-500 text-[11px] font-medium hover:text-zinc-300 transition-colors cursor-pointer w-fit">{video.channelTitle}</p>
-                        <p className="text-zinc-600 text-xs">
+                    <div className="flex flex-col gap-0.5 mt-1">
+                        <p className="text-zinc-500 text-xs font-medium hover:text-zinc-300 transition-colors cursor-pointer w-fit">{video.channelTitle}</p>
+                        <p className="text-zinc-500/80 text-xs">
                             {formatViewCount(video.viewCount)} • {formatPublishedAt(video.publishedAt)}
                         </p>
                     </div>
                 </div>
                 <button
-                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-white hover:bg-white/5 opacity-0 group-hover:opacity-100 transition-all"
+                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-white hover:bg-white/5 opacity-0 group-hover:opacity-100 transition-all self-start mt-1"
                     onClick={(e) => e.stopPropagation()}
                     aria-label="More options"
                 >
-                    <MoreVertical size={16} />
+                    <MoreVertical size={18} />
                 </button>
             </div>
         </article>

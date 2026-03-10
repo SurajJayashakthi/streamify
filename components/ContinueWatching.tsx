@@ -31,11 +31,15 @@ export default function ContinueWatching() {
     if (progressList.length === 0) return null;
 
     return (
-        <div className="mb-8 sm:mb-10 w-full overflow-hidden">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <div className="w-1 h-6 rounded-full" style={{ background: 'linear-gradient(to bottom, #a855f7, #7c3aed)' }} />
-                Continue Watching
-            </h2>
+        <div className="mb-12 w-full overflow-hidden">
+            <div className="flex flex-col gap-2 mb-8">
+                <h2 className="text-sm font-bold text-zinc-600 tracking-widest uppercase">
+                    Resume Playback
+                </h2>
+                <p className="text-2xl font-bold text-white tracking-tight">
+                    Continue Watching
+                </p>
+            </div>
 
             <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 scrollbar-none snap-x">
                 {progressList.map((item) => {
@@ -50,37 +54,37 @@ export default function ContinueWatching() {
                             tabIndex={0}
                             onKeyDown={(e) => e.key === 'Enter' && setActiveVideo(item.video)}
                         >
-                            <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 transition-transform duration-300 group-hover:scale-[1.03] group-hover:shadow-[0_8px_30px_rgba(168,85,247,0.25)]">
+                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900 transition-transform duration-500 group-hover:scale-[1.03]">
                                 <Image
                                     src={item.video.thumbnail}
                                     alt={item.video.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     sizes="(max-width: 640px) 260px, 280px"
                                 />
 
                                 {/* Overlay play button */}
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.6)]"
-                                        style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
-                                        <Play className="text-white ml-1" size={20} fill="white" />
+                                    <div className="w-14 h-14 rounded-full flex items-center justify-center backdrop-blur-xl border border-white/10"
+                                        style={{ background: 'rgba(255,255,255,0.1)' }}>
+                                        <Play className="text-white ml-1" size={24} fill="white" />
                                     </div>
                                 </div>
 
-                                {/* Progress Bar */}
-                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/50">
+                                {/* Progress Bar (YouTube Red) */}
+                                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/10">
                                     <div
-                                        className="h-full"
-                                        style={{ width: `${percentage}%`, background: '#a855f7' }}
+                                        className="h-full bg-red-600"
+                                        style={{ width: `${percentage}%` }}
                                     />
                                 </div>
                             </div>
 
-                            <div className="mt-3 min-w-0 pr-2">
-                                <h3 className="text-[13px] sm:text-sm font-semibold text-zinc-100 leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors">
+                            <div className="mt-4 min-w-0 pr-2">
+                                <h3 className="text-base font-semibold text-white leading-tight tracking-tight line-clamp-2 group-hover:text-red-500 transition-colors">
                                     {item.video.title}
                                 </h3>
-                                <p className="text-xs text-zinc-500 mt-0.5 truncate">{item.video.channelTitle}</p>
+                                <p className="text-xs text-zinc-500 mt-1 font-medium">{item.video.channelTitle}</p>
                             </div>
                         </div>
                     );

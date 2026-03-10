@@ -61,43 +61,42 @@ export default function Navbar() {
 
     return (
         <header
-            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 py-2 h-12"
+            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-12 h-16 border-b border-zinc-800/40"
             style={{
-                background: 'rgba(0, 0, 0, 0.8)',
+                background: 'rgba(0, 0, 0, 0.7)',
                 backdropFilter: 'blur(40px)',
-                borderBottom: '1px solid rgba(39, 39, 42, 0.4)',
             }}
         >
             {/* Logo/Hamburger */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-8">
                 <button
                     onClick={() => setIsDrawerOpen(true)}
                     className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
                     aria-label="Open menu"
                 >
-                    <Menu size={18} strokeWidth={1.5} />
+                    <Menu size={24} strokeWidth={2} />
                 </button>
-                <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-white" strokeWidth={1.5} />
-                    <span className="text-[11px] font-black tracking-[0.2em] uppercase text-white/90">Streamify</span>
+                <div className="flex items-center gap-3">
+                    <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                    <span className="text-sm font-bold tracking-tight text-white leading-none">Streamify</span>
                 </div>
             </div>
 
             {/* Search bar centered */}
-            <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-md hidden sm:block relative group px-6" ref={suggestRef}>
+            <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-lg hidden md:block relative group" ref={suggestRef}>
                 <Search
-                    className="absolute left-10 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-white transition-colors pointer-events-none"
-                    size={14}
-                    strokeWidth={1.5}
+                    className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors pointer-events-none"
+                    size={18}
+                    strokeWidth={2}
                 />
                 <input
                     type="text"
-                    placeholder="Search music..."
+                    placeholder="Search your favorite music..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onKeyDown={handleKeyDown}
-                    className="w-full pl-10 pr-5 py-1.5 text-[11px] text-white placeholder-zinc-600 rounded-full outline-none transition-all duration-500 bg-transparent border border-zinc-800 hover:border-zinc-700 focus:border-white/20"
+                    className="w-full pl-14 pr-6 py-3 text-sm text-white placeholder-zinc-500 rounded-full outline-none transition-all duration-500 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 focus:border-white/20 backdrop-blur-md"
                     aria-label="Search videos"
                 />
 
@@ -120,19 +119,18 @@ export default function Navbar() {
             </div>
 
             {/* Right Tools */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-8">
                 <button
-                    className="relative p-2 text-zinc-500 hover:text-white transition-all group"
+                    className="relative p-2 text-zinc-500 hover:text-white transition-all"
                     aria-label="Notifications"
                 >
-                    <Bell size={16} strokeWidth={1.5} />
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-violet-500 transition-all group-hover:w-3" />
+                    <Bell size={24} strokeWidth={2} />
                 </button>
                 <button
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
                     aria-label="User profile"
                 >
-                    <User size={14} strokeWidth={1.5} />
+                    <User size={20} strokeWidth={2} />
                 </button>
             </div>
         </header>
