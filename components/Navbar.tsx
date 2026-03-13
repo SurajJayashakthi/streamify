@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Search, Bell, User, Sparkles, Menu } from 'lucide-react';
+import { Search, Bell, User, Sparkles, Menu, X } from 'lucide-react';
 import { useVideoStore } from '@/store/useVideoStore';
 
 export default function Navbar() {
-    const { searchQuery, setSearchQuery, setIsDrawerOpen } = useVideoStore();
+    const { setSearchQuery, setIsDrawerOpen } = useVideoStore();
     const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const suggestRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Debounce suggestions
     useEffect(() => {
@@ -57,51 +59,76 @@ export default function Navbar() {
         setInputValue(suggestion);
         setSearchQuery(suggestion);
         setShowSuggestions(false);
+        setIsSearchExpanded(false);
+    };
+
+    const toggleSearch = () => {
+        setIsSearchExpanded(!isSearchExpanded);
+        if (!isSearchExpanded) {
+            setTimeout(() => inputRef.current?.focus(), 100);
+        }
     };
 
     return (
         <header
-            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 md:px-12 h-16 border-b border-zinc-800/40"
+            className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-8 h-20 border-b border-zinc-800/50"
             style={{
-                background: 'rgba(0, 0, 0, 0.7)',
+                background: '#000000',
                 backdropFilter: 'blur(40px)',
             }}
         >
-            {/* Logo/Hamburger */}
-            <div className="flex items-center gap-8">
-                <button
-                    onClick={() => setIsDrawerOpen(true)}
-                    className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
-                    aria-label="Open menu"
-                >
-                    <Menu size={24} strokeWidth={2} />
-                </button>
-                <div className="flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
-                    <span className="text-sm font-bold tracking-tight text-white leading-none">Streamify</span>
+            {/* Logo Section */}
+            {!isSearchExpanded && (
+                <div className="flex items-center gap-8 transition-opacity duration-300">
+                    <button
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="p-1 text-zinc-500 hover:text-white transition-colors md:hidden"
+                        aria-label="Open menu"
+                    >
+                        <Menu size={24} strokeWidth={2} />
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
+                        <span className="text-sm font-bold tracking-tight text-white leading-none">Streamify</span>
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Search bar centered - visible on mobile now */}
-            <div className="absolute left-1/2 -translate-x-1/2 w-[calc(100%-160px)] md:w-full max-w-lg group relative" ref={suggestRef}>
-                <Search
-                    className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors pointer-events-none"
-                    size={16}
-                    strokeWidth={2}
-                />
-                <input
-                    type="text"
-                    placeholder="Search your favorite music..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onFocus={() => setShowSuggestions(true)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full pl-10 md:pl-14 pr-4 md:pr-6 py-2 md:py-3 text-xs md:text-sm text-white placeholder-zinc-500 rounded-full outline-none transition-all duration-500 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 focus:border-white/20 backdrop-blur-md"
-                    aria-label="Search videos"
-                />
+            {/* Expandable Search Bar Area */}
+            <div
+                className={`relative flex items-center transition-all duration-500 ease-in-out ${isSearchExpanded
+                    ? 'flex-1 md:max-w-2xl mx-4'
+                    : 'w-0 overflow-hidden opacity-0'
+                    }`}
+                ref={suggestRef}
+            >
+                <div className="relative w-full">
+                    <Search
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+                        size={18}
+                        strokeWidth={2}
+                    />
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Search your favorite music..."
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onFocus={() => setShowSuggestions(true)}
+                        onKeyDown={handleKeyDown}
+                        className="w-full pl-12 pr-12 py-3 text-sm text-white placeholder-zinc-500 rounded-full outline-none bg-zinc-900/50 border border-zinc-800 focus:border-white/20 backdrop-blur-md"
+                        aria-label="Search videos"
+                    />
+                    <button
+                        onClick={() => setIsSearchExpanded(false)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors"
+                    >
+                        <X size={20} strokeWidth={2} />
+                    </button>
+                </div>
 
                 {/* Search Suggestions Dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
+                {isSearchExpanded && showSuggestions && suggestions.length > 0 && (
                     <div className="absolute top-full left-0 right-0 mt-3 py-2 rounded-2xl border border-white/5 shadow-2xl overflow-hidden z-50 backdrop-blur-3xl"
                         style={{ background: 'rgba(9, 9, 11, 0.9)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
                         {suggestions.map((suggestion, idx) => (
@@ -119,19 +146,33 @@ export default function Navbar() {
             </div>
 
             {/* Right Tools */}
-            <div className="flex items-center gap-8">
-                <button
-                    className="relative p-2 text-zinc-500 hover:text-white transition-all"
-                    aria-label="Notifications"
-                >
-                    <Bell size={24} strokeWidth={2} />
-                </button>
-                <button
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
-                    aria-label="User profile"
-                >
-                    <User size={20} strokeWidth={2} />
-                </button>
+            <div className="flex items-center gap-6">
+                {!isSearchExpanded && (
+                    <button
+                        onClick={toggleSearch}
+                        className="p-2 text-zinc-500 hover:text-white transition-all bg-zinc-900/30 rounded-full border border-zinc-800/50"
+                        aria-label="Search"
+                    >
+                        <Search size={22} strokeWidth={2} />
+                    </button>
+                )}
+
+                {!isSearchExpanded && (
+                    <div className="hidden md:flex items-center gap-6">
+                        <button
+                            className="relative p-2 text-zinc-500 hover:text-white transition-all"
+                            aria-label="Notifications"
+                        >
+                            <Bell size={24} strokeWidth={2} />
+                        </button>
+                        <button
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all bg-zinc-900 border border-zinc-800 hover:border-zinc-700"
+                            aria-label="User profile"
+                        >
+                            <User size={20} strokeWidth={2} />
+                        </button>
+                    </div>
+                )}
             </div>
         </header>
     );

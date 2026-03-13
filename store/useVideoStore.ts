@@ -7,6 +7,7 @@ export interface YouTubeVideo {
   thumbnail: string;
   viewCount?: string;
   publishedAt?: string;
+  duration?: string;
   description?: string;
 }
 

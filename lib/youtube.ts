@@ -72,11 +72,11 @@ export async function getYouTubeVideos(query: string, maxResults = 20, pageToken
             },
         });
 
-        const items = searchResponse.data.items;
+        const items = searchResponse.data.items as any[];
         const nextPageToken = searchResponse.data.nextPageToken || null;
         if (!items || items.length === 0) return { videos: [], nextPageToken: null };
 
-        const videoIds = items.map((item: any) => item.id.videoId).join(',');
+        const videoIds = items.map((item) => item.id.videoId).join(',');
 
         // Step 2: Fetch video statistics for view counts
         const statsResponse = await axios.get(`${BASE_URL}/videos`, {
@@ -88,11 +88,11 @@ export async function getYouTubeVideos(query: string, maxResults = 20, pageToken
         });
 
         const statsMap: Record<string, any> = {};
-        statsResponse.data.items.forEach((item: any) => {
+        statsResponse.data.items.forEach((item: { id: string; statistics: any }) => {
             statsMap[item.id] = item.statistics;
         });
 
-        const videos: YouTubeVideo[] = items.map((item: any) => {
+        const videos: YouTubeVideo[] = items.map((item) => {
             const id = item.id.videoId;
             const stats = statsMap[id] || {};
             const viewCount = stats.viewCount
@@ -164,17 +164,21 @@ export function getPersonalizedQuery(): string {
         const favorites = JSON.parse(localStorage.getItem('streamify_favorites') || '[]');
         const continueWatching = JSON.parse(localStorage.getItem('streamify_continue_watching') || '[]');
 
-        const allVideos = [...favorites, ...continueWatching];
+        // Extract videos from continueWatching if it's an array of objects with a 'video' property
+        const historyVideos = continueWatching.map((item: { video: YouTubeVideo } | YouTubeVideo) => ('video' in item ? item.video : item)).filter(Boolean);
+        const allVideos = [...favorites, ...historyVideos];
+
         if (allVideos.length === 0) return 'Top Hits 2026';
 
-        // Extract keywords from titles
+        // Extract keywords from titles and channel titles
         const keywords: Record<string, number> = {};
-        const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'with', 'for', 'of', 'by', 'to', 'music', 'video', 'official', 'audio', 'lyrics', 'remix']);
+        const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'with', 'for', 'of', 'by', 'to', 'music', 'video', 'official', 'audio', 'lyrics', 'remix', 'vevo', 'ft', 'feat', 'hifi', '4k', 'hd']);
 
         allVideos.forEach(v => {
-            const words = v.title.toLowerCase().split(/[^a-z0-9]+/);
+            if (!v.title) return;
+            const words = (v.title + ' ' + (v.channelTitle || '')).toLowerCase().split(/[^a-z0-9]+/);
             words.forEach((word: string) => {
-                if (word.length > 2 && !stopWords.has(word)) {
+                if (word.length > 3 && !stopWords.has(word)) {
                     keywords[word] = (keywords[word] || 0) + 1;
                 }
             });
@@ -186,7 +190,8 @@ export function getPersonalizedQuery(): string {
             .map(e => e[0]);
 
         return topKeywords.length > 0 ? topKeywords.join(' ') : 'Top Hits 2026';
-    } catch {
+    } catch (err) {
+        console.error('Error generating personalized query:', err);
         return 'Top Hits 2026';
     }
 }
@@ -209,7 +214,7 @@ export async function getRelatedVideos(videoId: string): Promise<YouTubeVideo[]>
         const items = response.data.items;
         if (!items) return [];
 
-        return items.map((item: any) => ({
+        return items.map((item: { id: { videoId: string }; snippet: { title: string; channelTitle: string; thumbnails: Record<string, { url: string }>; publishedAt: string } }) => ({
             id: item.id.videoId,
             title: item.snippet.title,
             channelTitle: item.snippet.channelTitle,

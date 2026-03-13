@@ -5,6 +5,7 @@ import { getContinueWatchingList, VideoProgress } from '@/lib/progress';
 import { Play } from 'lucide-react';
 import Image from 'next/image';
 import { useVideoStore } from '@/store/useVideoStore';
+import { decodeHTML } from '@/lib/utils';
 
 export default function ContinueWatching() {
     const [progressList, setProgressList] = useState<VideoProgress[]>([]);
@@ -82,7 +83,7 @@ export default function ContinueWatching() {
 
                             <div className="mt-4 min-w-0 pr-2">
                                 <h3 className="text-base font-semibold text-white leading-tight tracking-tight line-clamp-2 group-hover:text-red-500 transition-colors">
-                                    {item.video.title}
+                                    {decodeHTML(item.video.title)}
                                 </h3>
                                 <p className="text-xs text-zinc-500 mt-1 font-medium">{item.video.channelTitle}</p>
                             </div>

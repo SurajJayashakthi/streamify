@@ -31,13 +31,13 @@ export default function VideoGrid() {
     const [activeTag, setActiveTag] = useState('All');
     const observer = useRef<IntersectionObserver | null>(null);
 
-    const fetchVideos = useCallback(async (query: string, isInitial = true) => {
+    const fetchVideos = useCallback(async (isInitial = false) => {
         if (isInitial) setLoading(true);
         else setLoadingMore(true);
 
         setError(null);
 
-        if (query === '__FAVORITES__') {
+        if (searchQuery === '__FAVORITES__') {
             setVideos(favorites);
             setLoading(false);
             setLoadingMore(false);
@@ -45,7 +45,7 @@ export default function VideoGrid() {
         }
 
         // Use personalized query for initial load if search is default
-        const finalQuery = (isInitial && query === 'lofi music chill beats') ? getPersonalizedQuery() : query;
+        const finalQuery = (isInitial && searchQuery === 'lofi music chill beats') ? getPersonalizedQuery() : searchQuery;
 
         try {
             const { videos: newVideos, nextPageToken: newToken } = await getYouTubeVideos(
@@ -66,11 +66,12 @@ export default function VideoGrid() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [favorites, nextPageToken, setNextPageToken]);
+    }, [favorites, nextPageToken, setNextPageToken, searchQuery]);
 
+    // Initial fetch
     useEffect(() => {
-        fetchVideos(searchQuery, true);
-    }, [searchQuery]); // Removed fetchVideos to avoid recursive calls
+        fetchVideos(true);
+    }, [fetchVideos]);
 
     const lastVideoRef = useCallback((node: HTMLDivElement | null) => {
         if (loading || loadingMore) return;
@@ -78,7 +79,7 @@ export default function VideoGrid() {
 
         observer.current = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && nextPageToken && searchQuery !== '__FAVORITES__') {
-                fetchVideos(searchQuery, false);
+                fetchVideos(false);
             }
         });
 
@@ -112,9 +113,9 @@ export default function VideoGrid() {
                     <button
                         key={tag.label}
                         onClick={() => handleTagClick(tag)}
-                        className={`px-8 py-3 rounded-full text-xs font-bold tracking-tight transition-all duration-500 whitespace-nowrap ${activeTag === tag.label
-                            ? 'bg-white text-black'
-                            : 'bg-zinc-900/50 text-zinc-500 hover:text-white hover:bg-zinc-800'
+                        className={`px-8 py-3 rounded-xl text-xs font-bold tracking-tight transition-all duration-500 whitespace-nowrap border ${activeTag === tag.label
+                            ? 'bg-white text-black border-white'
+                            : 'bg-zinc-900/30 text-zinc-500 hover:text-white border-zinc-800/50'
                             }`}
                     >
                         {tag.label}
@@ -124,15 +125,15 @@ export default function VideoGrid() {
 
             {/* Error state */}
             {error && !loading && (
-                <ErrorBanner error={error} onRetry={() => fetchVideos(searchQuery)} />
+                <ErrorBanner error={error} onRetry={() => fetchVideos(true)} />
             )}
 
             {/* Video grid */}
             {!error && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-8 gap-y-12 mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mt-6">
                     {loading
                         ? Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-                            <SkeletonCard key={i} />
+                            <SkeletonCard key={`initial-${i}`} />
                         ))
                         : videos.map((video, index) => {
                             if (videos.length === index + 1) {
@@ -145,7 +146,7 @@ export default function VideoGrid() {
                                 return <VideoCard key={video.id} video={video} />;
                             }
                         })}
-                    {loadingMore && Array.from({ length: 4 }).map((_, i) => (
+                    {loadingMore && Array.from({ length: 8 }).map((_, i) => (
                         <SkeletonCard key={`more-${i}`} />
                     ))}
                 </div>

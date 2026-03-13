@@ -18,16 +18,28 @@
   padding: 0;
 }
 
-html,
-body {
-  background: #000000;
-  color: #fafafa;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  letter-spacing: -0.01em;
+@layer base {
+  body {
+    @apply bg-[#000000] text-zinc-100 selection:bg-indigo-500/30;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@layer utilities {
+  .border-faint {
+    border-color: rgba(39, 39, 42, 0.5);
+    /* zinc-800 with 0.5 opacity */
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    /* ... other variables if any ... */
+  }
 }
 
 h1,

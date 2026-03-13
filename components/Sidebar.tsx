@@ -9,10 +9,9 @@ import {
     Music2,
     Gamepad2,
     ThumbsUp,
-    Radio,
-    Podcast,
     ListMusic,
-    Zap,
+    Podcast,
+    Radio,
     Sparkles,
 } from 'lucide-react';
 import { useVideoStore } from '@/store/useVideoStore';
@@ -33,7 +32,7 @@ const libraryItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { setSearchQuery } = useVideoStore();
+    const { searchQuery, setSearchQuery } = useVideoStore();
 
     const handleNavClick = (query?: string) => {
         if (query) {
@@ -46,7 +45,7 @@ export default function Sidebar() {
         <>
             {/* Desktop Sidebar */}
             <aside
-                className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 bg-black border-right border-zinc-800/40"
+                className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-[240px] z-40 bg-black border-r border-zinc-800/50"
             >
                 {/* Logo Section */}
                 <div className="flex items-center gap-4 px-10 py-10 h-16">
@@ -57,43 +56,40 @@ export default function Sidebar() {
                 </div>
 
                 {/* Main Nav */}
-                <nav className="flex flex-col gap-6 px-4 pt-10">
-                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-6 mb-2">Primary</p>
-                    {navItems.map(({ label, icon: Icon, href }) => {
-                        const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
+                <nav className="flex flex-col gap-y-8 px-4">
+                    {navItems.map(({ label, href, icon: Icon }) => {
+                        const isActive = (href === '/' ? searchQuery !== '__FAVORITES__' : searchQuery === '__FAVORITES__');
                         return (
                             <Link
                                 key={label}
                                 href={href}
-                                className={`flex items-center gap-6 px-6 py-4 rounded-xl text-sm font-semibold transition-all duration-500 group relative ${isActive
-                                    ? 'bg-white/5 text-[#8b5cf6] shadow-[inset_0_0_20px_rgba(139,92,246,0.05)]'
-                                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                className={`flex items-center gap-6 py-4 px-6 rounded-xl text-sm font-semibold transition-all duration-500 group relative border-l-4 ${isActive
+                                    ? 'bg-white/5 text-[#8b5cf6] border-[#8b5cf6]'
+                                    : 'text-zinc-500 hover:text-white hover:bg-white/5 border-transparent'
                                     }`}
                             >
-                                {isActive && (
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#8b5cf6] rounded-r-full shadow-[4px_0_15px_rgba(139,92,246,0.4)]" />
-                                )}
                                 <Icon
-                                    className={`w-6 h-6 transition-colors ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-500 group-hover:text-white'}`}
+                                    size={24}
+                                    className={`transition-colors shrink-0 ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-500 group-hover:text-white'}`}
                                     strokeWidth={1.5}
                                 />
-                                {label}
+                                <span className="truncate">{label}</span>
                             </Link>
                         );
                     })}
                 </nav>
 
                 {/* Library Nav */}
-                <nav className="flex flex-col gap-6 px-4 pt-12">
+                <nav className="flex flex-col gap-y-6 px-4 pt-12">
                     <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] px-6 mb-2">Your Space</p>
                     {libraryItems.map(({ label, icon: Icon, href }) => (
                         <Link
                             key={label}
                             href={href}
-                            className="flex items-center gap-6 px-6 py-4 rounded-xl text-sm font-semibold text-zinc-500 hover:text-white hover:bg-white/5 transition-all duration-500 group"
+                            className="flex items-center gap-6 py-4 px-6 rounded-xl text-sm font-semibold text-zinc-500 hover:text-white hover:bg-white/5 transition-all duration-500 group border-l-4 border-transparent"
                         >
-                            <Icon className="w-6 h-6 text-zinc-500 group-hover:text-white transition-colors" strokeWidth={1.5} />
-                            {label}
+                            <Icon size={24} className="text-zinc-500 group-hover:text-white transition-colors shrink-0" strokeWidth={1.5} />
+                            <span className="truncate">{label}</span>
                         </Link>
                     ))}
                 </nav>
@@ -106,24 +102,26 @@ export default function Sidebar() {
             </aside>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50 flex justify-around items-center px-6 py-2 bg-zinc-950/80 backdrop-blur-2xl border border-white/5 h-[64px] rounded-3xl shadow-2xl overflow-hidden">
-                {[
-                    { label: 'Home', icon: Home, query: '' },
-                    { label: 'Library', icon: Library, query: '__FAVORITES__' },
-                ].map(({ label, icon: Icon, query }) => {
-                    const href = query ? `/?q=${query}` : '/';
-                    const isActive = pathname === href || (href !== '/' && pathname.includes(query));
-                    return (
-                        <Link key={label} href={href}
-                            onClick={() => handleNavClick(query)}
-                            className={`flex flex-col items-center gap-2 p-2 transition-all duration-500 w-fit group relative ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-600 hover:text-zinc-400'}`}>
-                            <Icon size={24} strokeWidth={1.5} className={isActive ? 'text-[#8b5cf6]' : ''} />
-                            <span className="text-[9px] font-black tracking-widest uppercase opacity-70">{label}</span>
-                            {isActive && <span className="absolute bottom-1 w-4 h-[2px] bg-[#8b5cf6] rounded-full" />}
-                        </Link>
-                    );
-                })}
-            </nav>
+            <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 px-4">
+                <nav className="max-w-md mx-auto flex justify-center items-center px-4 py-2 bg-zinc-950/80 backdrop-blur-2xl border border-white/5 h-[72px] rounded-3xl shadow-2xl">
+                    {[
+                        { label: 'Home', icon: Home, query: '' },
+                        { label: 'Library', icon: Library, query: '__FAVORITES__' },
+                    ].map(({ label, icon: Icon, query }) => {
+                        const href = query ? `/?q=${query}` : '/';
+                        const isActive = pathname === href || (href !== '/' && pathname.includes(query));
+                        return (
+                            <Link key={label} href={href}
+                                onClick={() => handleNavClick(query)}
+                                className={`flex flex-col items-center gap-2 px-6 py-4 transition-all duration-500 w-fit group relative ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-600 hover:text-zinc-400'}`}>
+                                <Icon size={24} strokeWidth={1.5} className={isActive ? 'text-[#8b5cf6]' : ''} />
+                                <span className="text-[9px] font-black tracking-widest uppercase opacity-70">{label}</span>
+                                {isActive && <span className="absolute bottom-1 w-4 h-[2px] bg-[#8b5cf6] rounded-full" />}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
         </>
     );
 }

@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import dynamic from 'next/dynamic';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
 import MobileDrawer from '@/components/MobileDrawer';
-
 import ClientPlayer from '@/components/ClientPlayer';
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -35,19 +34,15 @@ export default function RootLayout({
         <meta name="theme-color" content="#09090b" />
       </head>
       <body className="antialiased selection:bg-indigo-500/30">
-        {/* Sidebar (desktop fixed left / mobile bottom nav) */}
         <Sidebar />
         <MobileDrawer />
-
-        {/* Main content offset by sidebar width on desktop */}
-        <div
-          className="md:pl-[240px] px-8"
-          style={{ paddingBottom: '140px' }}
-        >
-          {children}
+        {/* Main content area restricted and centered */}
+        <div className="md:pl-[240px] w-full">
+          <main className="max-w-screen-xl mx-auto w-full px-8 pt-24" style={{ paddingBottom: '140px' }}>
+            {children}
+          </main>
         </div>
 
-        {/* Fixed bottom player — client-only */}
         <ClientPlayer />
       </body>
     </html>

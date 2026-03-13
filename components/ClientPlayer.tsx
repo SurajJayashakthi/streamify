@@ -1,10 +1,16 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-// Must live in a Client Component — ssr:false is only allowed in Client Components
-const CustomPlayer = dynamic(() => import('./CustomPlayer'), { ssr: false });
+import Navbar from './Navbar';
+import CustomPlayer from './CustomPlayer';
+import { useVideoStore } from '@/store/useVideoStore';
 
 export default function ClientPlayer() {
-    return <CustomPlayer />;
+    const { isPlayerOpen } = useVideoStore();
+
+    return (
+        <>
+            <Navbar />
+            {isPlayerOpen && <CustomPlayer />}
+        </>
+    );
 }
