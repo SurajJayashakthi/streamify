@@ -229,7 +229,7 @@ export default function VideoGrid() {
                     {!loading && allVideos.map((video, index) => {
                         const isLast = index === allVideos.length - 1 && !showTrending;
                         return (
-                            <div key={video.id} ref={isLast ? lastCardRef : undefined}>
+                            <div key={`feed-${video.id}-${index}`} ref={isLast ? lastCardRef : undefined}>
                                 <VideoCard video={video} />
                             </div>
                         );
@@ -245,7 +245,7 @@ export default function VideoGrid() {
                             {trendingVideos.map((video, index) => {
                                 const isLast = index === trendingVideos.length - 1;
                                 return (
-                                    <div key={video.id} ref={isLast ? lastCardRef : undefined}>
+                                    <div key={`trend-${video.id}-${index}`} ref={isLast ? lastCardRef : undefined}>
                                         <VideoCard video={video} />
                                     </div>
                                 );
