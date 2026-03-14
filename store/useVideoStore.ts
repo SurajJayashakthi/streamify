@@ -32,7 +32,7 @@ interface VideoStore {
 
 export const useVideoStore = create<VideoStore>((set) => ({
   activeVideo: null,
-  searchQuery: 'lofi music chill beats',
+  searchQuery: '__HOME__',
   isPlayerOpen: false,
   isMinimized: false,
   isDrawerOpen: false,

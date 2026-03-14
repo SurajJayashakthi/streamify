@@ -10,15 +10,11 @@ export default function HomePage() {
       {/* Fixed top navbar */}
       <Navbar />
 
-      {/* Scrollable content below the 64px navbar */}
-      <main
-        className="pt-[64px] px-8 py-10 md:py-16 min-h-screen"
-      >
-        <div className="max-w-[2000px] mx-auto flex flex-col gap-y-10">
-          <ContinueWatching />
-          <VideoGrid />
-        </div>
-      </main>
+      {/* Main content without duplicate wrappers or padding since layout.tsx handles it */}
+      <div className="flex flex-col gap-y-12">
+        <ContinueWatching />
+        <VideoGrid />
+      </div>
     </>
   );
 }

@@ -157,24 +157,40 @@ export function formatPublishedAt(dateStr?: string): string {
     return `${Math.floor(diffDays / 365)} years ago`;
 }
 
+// Fallback queries rotated to keep home feed fresh if no history exists
+const FALLBACK_QUERIES = [
+    'New Music 2026',
+    'Top Hits 2026',
+    'Popular Songs 2026',
+    'Best Music 2026',
+    'Viral Music 2026',
+];
+
 export function getPersonalizedQuery(): string {
-    if (typeof window === 'undefined') return 'Top Hits 2026';
+    if (typeof window === 'undefined') return FALLBACK_QUERIES[0];
 
     try {
         const favorites = JSON.parse(localStorage.getItem('streamify_favorites') || '[]');
         const continueWatching = JSON.parse(localStorage.getItem('streamify_continue_watching') || '[]');
 
-        // Extract videos from continueWatching if it's an array of objects with a 'video' property
-        const historyVideos = continueWatching.map((item: { video: YouTubeVideo } | YouTubeVideo) => ('video' in item ? item.video : item)).filter(Boolean);
+        const historyVideos = continueWatching
+            .map((item: { video: YouTubeVideo } | YouTubeVideo) => ('video' in item ? item.video : item))
+            .filter(Boolean);
         const allVideos = [...favorites, ...historyVideos];
 
-        if (allVideos.length === 0) return 'Top Hits 2026';
+        if (allVideos.length === 0) {
+            // Rotate through fallback queries based on day of week so it feels fresh
+            return FALLBACK_QUERIES[new Date().getDay() % FALLBACK_QUERIES.length];
+        }
 
-        // Extract keywords from titles and channel titles
         const keywords: Record<string, number> = {};
-        const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'with', 'for', 'of', 'by', 'to', 'music', 'video', 'official', 'audio', 'lyrics', 'remix', 'vevo', 'ft', 'feat', 'hifi', '4k', 'hd']);
+        const stopWords = new Set([
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'with', 'for',
+            'of', 'by', 'to', 'music', 'video', 'official', 'audio', 'lyrics', 'remix',
+            'vevo', 'ft', 'feat', 'hifi', '4k', 'hd', 'full', 'best', 'new', 'live',
+        ]);
 
-        allVideos.forEach(v => {
+        allVideos.forEach((v: YouTubeVideo) => {
             if (!v.title) return;
             const words = (v.title + ' ' + (v.channelTitle || '')).toLowerCase().split(/[^a-z0-9]+/);
             words.forEach((word: string) => {
@@ -186,13 +202,51 @@ export function getPersonalizedQuery(): string {
 
         const topKeywords = Object.entries(keywords)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 3)
+            .slice(0, 2)       // top 2 keywords makes a tighter, more relevant query
             .map(e => e[0]);
 
-        return topKeywords.length > 0 ? topKeywords.join(' ') : 'Top Hits 2026';
-    } catch (err) {
-        console.error('Error generating personalized query:', err);
-        return 'Top Hits 2026';
+        return topKeywords.length > 0 ? `${topKeywords.join(' ')} music` : FALLBACK_QUERIES[0];
+    } catch {
+        return FALLBACK_QUERIES[0];
+    }
+}
+
+/** Fetches a batch of currently trending music videos to sprinkle into the feed. */
+export async function getTrendingVideos(maxResults = 10): Promise<YouTubeVideo[]> {
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+    if (!apiKey) return [];
+
+    try {
+        const response = await axios.get(`${BASE_URL}/videos`, {
+            params: {
+                part: 'snippet,statistics',
+                chart: 'mostPopular',
+                videoCategoryId: '10', // Music
+                maxResults,
+                regionCode: 'US',
+                key: apiKey,
+            },
+        });
+
+        const items = response.data.items as any[];
+        if (!items?.length) return [];
+
+        return items.map((item: any) => ({
+            id: item.id,
+            title: item.snippet.title,
+            channelTitle: item.snippet.channelTitle,
+            thumbnail:
+                item.snippet.thumbnails?.maxres?.url ||
+                item.snippet.thumbnails?.high?.url ||
+                item.snippet.thumbnails?.medium?.url,
+            viewCount: item.statistics?.viewCount
+                ? parseInt(item.statistics.viewCount).toLocaleString()
+                : undefined,
+            publishedAt: item.snippet.publishedAt,
+            description: item.snippet.description,
+        }));
+    } catch {
+        return [];
     }
 }
 

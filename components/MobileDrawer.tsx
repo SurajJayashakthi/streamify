@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useVideoStore } from '@/store/useVideoStore';
 import {
     Home, TrendingUp, Music2, Gamepad2, ThumbsUp, X, Sparkles
@@ -9,23 +7,18 @@ import {
 import { useEffect } from 'react';
 
 const navItems = [
-    { label: 'Home', icon: Home, query: '' },
-    { label: 'Trending', icon: TrendingUp, query: 'trending' },
-    { label: 'Music', icon: Music2, query: 'music' },
-    { label: 'Gaming', icon: Gamepad2, query: 'gaming' },
-    { label: 'Favorites', icon: ThumbsUp, query: '__FAVORITES__' },
+    { label: 'Home',      icon: Home,      query: '__HOME__' },
+    { label: 'Trending',  icon: TrendingUp, query: 'trending music 2026' },
+    { label: 'Music',     icon: Music2,     query: 'new music 2026' },
+    { label: 'Gaming',    icon: Gamepad2,   query: 'gaming music epic' },
+    { label: 'Favorites', icon: ThumbsUp,   query: '__FAVORITES__' },
 ];
 
 export default function MobileDrawer() {
-    const { isDrawerOpen, setIsDrawerOpen, setSearchQuery } = useVideoStore();
-    const pathname = usePathname();
+    const { isDrawerOpen, setIsDrawerOpen, setSearchQuery, searchQuery } = useVideoStore();
 
     const handleNavClick = (query: string) => {
-        if (query) {
-            setSearchQuery(query);
-        } else {
-            setSearchQuery('lofi music chill beats');
-        }
+        setSearchQuery(query);
         setIsDrawerOpen(false);
     };
 
@@ -71,24 +64,27 @@ export default function MobileDrawer() {
                 <nav className="flex flex-col gap-2 px-4 pt-8 flex-1 overflow-y-auto">
                     <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest px-4 mb-4">Menu</p>
                     {navItems.map(({ label, icon: Icon, query }) => {
-                        const href = query ? `/?q=${query}` : '/';
-                        const isActive = pathname === href || (href !== '/' && pathname.includes(query));
+                        const isActive = searchQuery === query;
                         return (
-                            <Link
+                            <button
                                 key={label}
-                                href={href}
                                 onClick={() => handleNavClick(query)}
-                                className={`flex items-center gap-5 px-5 py-4 rounded-xl text-sm font-semibold transition-all duration-300 group ${isActive
-                                    ? 'bg-white/10 text-white'
-                                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                                    }`}
+                                className={`relative flex items-center gap-5 px-5 py-4 rounded-xl text-sm font-semibold transition-all duration-300 group w-full text-left overflow-hidden ${
+                                    isActive
+                                        ? 'text-[#8b5cf6] bg-[#8b5cf6]/10'
+                                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                }`}
                             >
+                                <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300 ${
+                                    isActive ? 'h-6 bg-[#8b5cf6]' : 'h-0'
+                                }`} />
                                 <Icon
-                                    className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-white'}`}
-                                    strokeWidth={isActive ? 2 : 1.5}
+                                    size={22}
+                                    strokeWidth={1.5}
+                                    className={`transition-colors shrink-0 ${isActive ? 'text-[#8b5cf6]' : 'text-zinc-500 group-hover:text-white'}`}
                                 />
                                 {label}
-                            </Link>
+                            </button>
                         );
                     })}
                 </nav>
