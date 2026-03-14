@@ -20,6 +20,7 @@ interface VideoStore {
   favorites: YouTubeVideo[];
   autoPlay: boolean;
   nextPageToken: string | null;
+  playHistory: YouTubeVideo[];
   setActiveVideo: (video: YouTubeVideo) => void;
   setSearchQuery: (query: string) => void;
   setIsPlayerOpen: (open: boolean) => void;
@@ -28,6 +29,7 @@ interface VideoStore {
   toggleFavorite: (video: YouTubeVideo) => void;
   setAutoPlay: (autoPlay: boolean) => void;
   setNextPageToken: (token: string | null) => void;
+  popHistory: () => void;
 }
 
 export const useVideoStore = create<VideoStore>((set) => ({
@@ -39,7 +41,20 @@ export const useVideoStore = create<VideoStore>((set) => ({
   favorites: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('streamify_favorites') || '[]') : [],
   autoPlay: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('streamify_autoplay') || 'true') : true,
   nextPageToken: null,
-  setActiveVideo: (video) => set({ activeVideo: video, isPlayerOpen: true, isMinimized: false }),
+  playHistory: [],
+  setActiveVideo: (video) => set((state) => {
+    // Only add to history if it's a new video
+    const newHistory = state.activeVideo && state.activeVideo.id !== video.id 
+      ? [...state.playHistory, state.activeVideo].slice(-50) // keep last 50
+      : state.playHistory;
+      
+    return { 
+      activeVideo: video, 
+      isPlayerOpen: true, 
+      isMinimized: false,
+      playHistory: newHistory
+    };
+  }),
   setSearchQuery: (query) => set({ searchQuery: query }),
   setIsPlayerOpen: (open) => set({ isPlayerOpen: open }),
   setIsMinimized: (minimized) => set({ isMinimized: minimized }),
@@ -62,4 +77,17 @@ export const useVideoStore = create<VideoStore>((set) => ({
     return { autoPlay };
   }),
   setNextPageToken: (token) => set({ nextPageToken: token }),
+  popHistory: () => set((state) => {
+    if (state.playHistory.length === 0) return state;
+    const newHistory = [...state.playHistory];
+    const previousVideo = newHistory.pop();
+    if (!previousVideo) return state;
+    
+    return {
+      activeVideo: previousVideo,
+      playHistory: newHistory,
+      isPlayerOpen: true,
+      isMinimized: false
+    };
+  }),
 }));

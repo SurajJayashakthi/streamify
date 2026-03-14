@@ -36,7 +36,9 @@ export default function CustomPlayer() {
         isMinimized,
         setIsMinimized,
         autoPlay,
-        setAutoPlay
+        setAutoPlay,
+        playHistory,
+        popHistory,
     } = useVideoStore();
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -91,8 +93,17 @@ export default function CustomPlayer() {
     }, [relatedVideos, setActiveVideo, clearCountdown]);
 
     const handlePlayPrev = useCallback(() => {
-        if (playerRef.current) playerRef.current.seekTo(0, true);
-    }, []);
+        if (currentTime > 5 && playerRef.current) {
+            // If more than 5 seconds in, restart current track
+            playerRef.current.seekTo(0, true);
+        } else if (playHistory.length > 0) {
+            // Otherwise go back to previous track
+            popHistory();
+        } else if (playerRef.current) {
+            // Fallback: just restart if no history
+            playerRef.current.seekTo(0, true);
+        }
+    }, [currentTime, playHistory.length, popHistory]);
 
     // ─── 4. Start 3-second countdown, then auto-advance ──────────────────────
     const startCountdown = useCallback(() => {
@@ -479,7 +490,10 @@ export default function CustomPlayer() {
                                 <FileText size={20} strokeWidth={2} />
                             </button>
                             <div className="flex items-center gap-12">
-                                <button onClick={handlePlayPrev} className="p-5 text-zinc-500 hover:text-white transition-all transform hover:scale-110">
+                                <button 
+                                    onClick={handlePlayPrev} 
+                                    className={`p-5 transition-all transform hover:scale-110 ${playHistory.length > 0 || currentTime > 5 ? 'text-zinc-500 hover:text-white' : 'text-zinc-700/50 cursor-not-allowed'}`}
+                                >
                                     <SkipBack size={28} strokeWidth={2} fill="currentColor" />
                                 </button>
                                 <button
@@ -511,10 +525,10 @@ export default function CustomPlayer() {
                 </div>
             </div>
 
-            {/* ── Minimized Player ──────────────────────────────────────────── */}
+            {/* ── Minimized Player (Floats above mobile nav) ──────────────── */}
             <div
-                onClick={() => setIsMinimized(false)}
-                className={`fixed bottom-10 right-10 left-10 md:left-auto md:w-[450px] bg-zinc-950/80 backdrop-blur-3xl border border-white/10 rounded-3xl p-4 flex items-center gap-6 cursor-pointer hover:bg-white/[0.04] transition-all duration-700 z-[110] shadow-[0_30px_70px_rgba(0,0,0,0.8)] border-b-4 border-b-[#8b5cf6] active:scale-[0.98] ${!isMinimized ? 'opacity-0 translate-y-32 pointer-events-none' : 'opacity-100 translate-y-0'}`}
+                onClick={(e) => { e.stopPropagation(); setIsMinimized(false); }}
+                className={`fixed bottom-[100px] md:bottom-10 left-4 right-4 md:left-auto md:w-[450px] bg-black backdrop-blur-md border border-white/10 border-t-zinc-800 rounded-3xl p-4 flex items-center gap-6 cursor-pointer hover:bg-zinc-900 transition-[transform,opacity,bottom] duration-700 z-[999] shadow-[0_30px_70px_rgba(0,0,0,0.8)] border-b-4 border-b-[#8b5cf6] pointer-events-auto active:scale-[0.98] ${!isMinimized ? 'opacity-0 translate-y-32 pointer-events-none' : 'opacity-100 translate-y-0'}`}
             >
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-2xl">
                     <Image src={activeVideo.thumbnail} alt={activeVideo.title} fill className="object-cover" />
@@ -535,7 +549,7 @@ export default function CustomPlayer() {
                     )}
                 </div>
                 <div className="flex items-center gap-2 pr-2" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={togglePlay} className="p-3 rounded-full hover:bg-white/10 transition-colors text-white">
+                    <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="p-3 rounded-full hover:bg-white/10 transition-colors text-white">
                         {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
                     </button>
                     <button

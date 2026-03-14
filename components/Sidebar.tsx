@@ -133,8 +133,8 @@ export default function Sidebar() {
             </aside>
 
             {/* ── Mobile Bottom Navigation ──────────────────────────────────── */}
-            <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4">
-                <nav className="flex items-center gap-2 px-4 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] h-[68px] rounded-3xl shadow-2xl w-fit">
+            <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 md:px-6">
+                <nav className="flex items-center justify-evenly gap-2 px-2 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] rounded-[2rem] shadow-2xl w-full max-w-[360px]">
                     {[
                         { label: 'Home',    icon: Home,    query: '__HOME__' },
                         { label: 'Library', icon: Library,  query: '__FAVORITES__' },
@@ -144,7 +144,7 @@ export default function Sidebar() {
                             <button
                                 key={label}
                                 onClick={() => handleNavClick(query)}
-                                className={`flex flex-col items-center gap-1.5 px-6 py-3 rounded-2xl transition-all duration-300 w-fit relative ${
+                                className={`flex flex-col items-center justify-center gap-1.5 px-6 py-4 rounded-3xl transition-all duration-300 flex-1 relative ${
                                     isActive
                                         ? 'text-[#8b5cf6] bg-[#8b5cf6]/10'
                                         : 'text-zinc-600 hover:text-zinc-400'
