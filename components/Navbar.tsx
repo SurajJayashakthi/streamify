@@ -152,18 +152,18 @@ export default function Navbar() {
             </div>
 
             {/* Right Tools (Notifications, User, Search Trigger) */}
-            <div className={`flex items-center gap-4 md:gap-6 transition-all duration-300 overflow-hidden ${
-                isSearchExpanded ? 'w-0 opacity-0 hidden md:flex md:w-auto md:opacity-100' : 'w-auto opacity-100 flex'
-            }`}>
+            <div className={`flex items-center gap-4 md:gap-6 transition-all duration-300`}>
                 <button
                     onClick={toggleSearch}
-                    className="p-2.5 text-zinc-400 hover:text-white transition-all bg-zinc-900/50 rounded-full border border-zinc-800/80 hover:border-zinc-700 mx-1 shadow-sm"
+                    className={`p-2.5 text-zinc-400 hover:text-white transition-all bg-zinc-900/50 rounded-full border border-zinc-800/80 hover:border-zinc-700 mx-1 shadow-sm ${
+                        isSearchExpanded ? 'w-0 opacity-0 hidden' : 'w-auto opacity-100 flex'
+                    }`}
                     aria-label="Search"
                 >
                     <Search size={20} strokeWidth={2} />
                 </button>
 
-                <div className="hidden md:flex items-center gap-6 shrink-0">
+                <div className={`items-center gap-6 shrink-0 ${isSearchExpanded ? 'hidden md:flex' : 'hidden md:flex'}`}>
                     <button
                         className="relative p-2 text-zinc-500 hover:text-white transition-all"
                         aria-label="Notifications"

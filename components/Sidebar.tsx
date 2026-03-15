@@ -51,7 +51,7 @@ export default function Sidebar() {
                 </div>
 
                 {/* Main Nav */}
-                <nav className="flex flex-col gap-y-6 px-3 mt-4">
+                <nav className="flex flex-col gap-y-8 px-3 mt-4">
                     {navItems.map(({ label, href, icon: Icon, query }) => {
                         const isActive = searchQuery === query;
                         return (
@@ -67,7 +67,7 @@ export default function Sidebar() {
                             >
                                 {/* Purple active bar on left edge */}
                                 <span
-                                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300 border-l-[3px] border-solid ${
+                                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[4px] rounded-r-full transition-all duration-300 border-l-[4px] border-solid ${
                                         isActive ? 'h-6 border-[#8b5cf6]' : 'h-0 border-transparent'
                                     }`}
                                 />
@@ -85,7 +85,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Library Nav */}
-                <nav className="flex flex-col gap-y-6 px-3 pt-10">
+                <nav className="flex flex-col gap-y-8 px-3 pt-10">
                     <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] px-5 mb-2">
                         Your Space
                     </p>
@@ -102,7 +102,7 @@ export default function Sidebar() {
                                 }`}
                             >
                                 <span
-                                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300 border-l-[3px] border-solid ${
+                                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-[4px] rounded-r-full transition-all duration-300 border-l-[4px] border-solid ${
                                         isActive ? 'h-6 border-[#8b5cf6]' : 'h-0 border-transparent'
                                     }`}
                                 />
@@ -134,7 +134,7 @@ export default function Sidebar() {
 
             {/* ── Mobile Bottom Navigation ──────────────────────────────────── */}
             <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 md:px-6">
-                <nav className="flex items-center justify-evenly gap-2 px-2 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] rounded-[2rem] shadow-2xl w-full max-w-[360px]">
+                <nav className="flex items-center justify-evenly gap-2 px-2 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] rounded-[2rem] shadow-2xl w-full max-w-md mx-auto">
                     {[
                         { label: 'Home',    icon: Home,    query: '__HOME__' },
                         { label: 'Library', icon: Library,  query: '__FAVORITES__' },

@@ -527,7 +527,7 @@ export default function CustomPlayer() {
 
             {/* ── Minimized Player (Floats above mobile nav) ──────────────── */}
             <div
-                onClick={(e) => { e.stopPropagation(); setIsMinimized(false); }}
+                onClickCapture={(e) => { e.preventDefault(); e.stopPropagation(); setIsMinimized(false); }}
                 className={`fixed bottom-[100px] md:bottom-10 left-4 right-4 md:left-auto md:w-[450px] bg-black backdrop-blur-md border border-white/10 border-t-zinc-800 rounded-3xl p-4 flex items-center gap-6 cursor-pointer hover:bg-zinc-900 transition-[transform,opacity,bottom] duration-700 z-[999] shadow-[0_30px_70px_rgba(0,0,0,0.8)] border-b-4 border-b-[#8b5cf6] pointer-events-auto active:scale-[0.98] ${!isMinimized ? 'opacity-0 translate-y-32 pointer-events-none' : 'opacity-100 translate-y-0'}`}
             >
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-2xl">
@@ -548,12 +548,12 @@ export default function CustomPlayer() {
                         </p>
                     )}
                 </div>
-                <div className="flex items-center gap-2 pr-2" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="p-3 rounded-full hover:bg-white/10 transition-colors text-white">
+                <div className="flex items-center gap-2 pr-2" onClickCapture={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                    <button onClickCapture={(e) => { e.preventDefault(); e.stopPropagation(); togglePlay(); }} className="p-3 rounded-full hover:bg-white/10 transition-colors text-white">
                         {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); clearCountdown(); setIsPlayerOpen(false); }}
+                        onClickCapture={(e) => { e.preventDefault(); e.stopPropagation(); clearCountdown(); setIsPlayerOpen(false); }}
                         className="p-3 rounded-full hover:bg-white/10 transition-colors text-zinc-500"
                     >
                         <X size={20} />
