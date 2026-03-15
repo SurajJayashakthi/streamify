@@ -82,23 +82,31 @@ export default function CustomPlayer() {
     }, [clearCountdown]);
 
     // ─── 3. Play next track ───────────────────────────────────────────────────
-    const handlePlayNext = useCallback(() => {
+    const handleNext = useCallback(() => {
         clearCountdown();
         const nextVideo = relatedVideos[0];
         if (nextVideo) {
             setActiveVideo(nextVideo);
+            setTimeout(() => {
+                if (playerRef.current) {
+                    playerRef.current.loadVideoById(nextVideo.id);
+                    playerRef.current.playVideo();
+                }
+            }, 50);
         } else {
             setIsPlaying(false);
+            playerRef.current?.pauseVideo();
         }
     }, [relatedVideos, setActiveVideo, clearCountdown]);
 
-    const handlePlayPrev = useCallback(() => {
+    const handlePrevious = useCallback(() => {
         if (currentTime > 5 && playerRef.current) {
             // If more than 5 seconds in, restart current track
             playerRef.current.seekTo(0, true);
         } else if (playHistory.length > 0) {
             // Otherwise go back to previous track
             popHistory();
+            // Store's activeVideo handles the load asynchronously
         } else if (playerRef.current) {
             // Fallback: just restart if no history
             playerRef.current.seekTo(0, true);
@@ -115,12 +123,12 @@ export default function CustomPlayer() {
             if (remaining <= 0) {
                 clearInterval(countdownTimerRef.current!);
                 countdownTimerRef.current = null;
-                handlePlayNext();
+                handleNext();
             } else {
                 setCountdown(remaining);
             }
         }, 1000);
-    }, [autoPlay, relatedVideos, handlePlayNext]);
+    }, [autoPlay, relatedVideos, handleNext]);
 
     // ─── 5. Player ready ──────────────────────────────────────────────────────
     const onReady = useCallback((event: { target: any }) => {
@@ -234,8 +242,8 @@ export default function CustomPlayer() {
         navigator.mediaSession.setActionHandler('play', () => playerRef.current?.playVideo());
         navigator.mediaSession.setActionHandler('pause', () => playerRef.current?.pauseVideo());
         navigator.mediaSession.setActionHandler('stop', () => playerRef.current?.pauseVideo());
-        navigator.mediaSession.setActionHandler('nexttrack', handlePlayNext);
-        navigator.mediaSession.setActionHandler('previoustrack', handlePlayPrev);
+        navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+        navigator.mediaSession.setActionHandler('previoustrack', handlePrevious);
         navigator.mediaSession.setActionHandler('seekto', (d) => {
             if (d.seekTime !== undefined && playerRef.current) {
                 playerRef.current.seekTo(d.seekTime, true);
@@ -246,7 +254,7 @@ export default function CustomPlayer() {
             (['play', 'pause', 'stop', 'nexttrack', 'previoustrack', 'seekto'] as MediaSessionAction[])
                 .forEach(action => { try { navigator.mediaSession.setActionHandler(action, null); } catch { /* ignore */ } });
         };
-    }, [activeVideo, handlePlayNext, handlePlayPrev]);
+    }, [activeVideo, handleNext, handlePrevious]);
 
     // ─── 12. Reset state when active video changes ────────────────────────────
     useEffect(() => {
@@ -263,7 +271,14 @@ export default function CustomPlayer() {
         };
     }, [clearCountdown]);
 
-    if (!isPlayerOpen || !activeVideo) return null;
+    // Pause when closed but do NOT unmount
+    useEffect(() => {
+        if (!isPlayerOpen && playerRef.current) {
+            playerRef.current.pauseVideo();
+        }
+    }, [isPlayerOpen]);
+
+    if (!activeVideo) return null;
 
     const opts = {
         height: '100%',
@@ -283,7 +298,7 @@ export default function CustomPlayer() {
     const progressPct = (currentTime / (duration || 1)) * 100;
 
     return (
-        <div className="fixed inset-0 z-[100] pointer-events-none">
+        <div className={`fixed inset-0 z-[100] ${isPlayerOpen ? 'pointer-events-none' : 'opacity-0 pointer-events-none invisible w-0 h-0 overflow-hidden'}`}>
             <div
                 className={`absolute inset-0 bg-black flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-auto h-[100dvh] overflow-hidden ${isMinimized ? 'opacity-0 translate-y-full' : 'opacity-100 translate-y-0'}`}
             >
@@ -491,7 +506,7 @@ export default function CustomPlayer() {
                             </button>
                             <div className="flex items-center gap-12">
                                 <button 
-                                    onClick={handlePlayPrev} 
+                                    onClick={handlePrevious} 
                                     className={`p-5 transition-all transform hover:scale-110 ${playHistory.length > 0 || currentTime > 5 ? 'text-zinc-500 hover:text-white' : 'text-zinc-700/50 cursor-not-allowed'}`}
                                 >
                                     <SkipBack size={28} strokeWidth={2} fill="currentColor" />
@@ -502,7 +517,7 @@ export default function CustomPlayer() {
                                 >
                                     {isPlaying ? <Pause size={40} fill="currentColor" /> : <Play size={40} className="ml-2" fill="currentColor" />}
                                 </button>
-                                <button onClick={handlePlayNext} className="p-5 text-zinc-500 hover:text-white transition-all transform hover:scale-110">
+                                <button onClick={handleNext} className="p-5 text-zinc-500 hover:text-white transition-all transform hover:scale-110">
                                     <SkipForward size={28} strokeWidth={2} fill="currentColor" />
                                 </button>
                             </div>
@@ -528,7 +543,7 @@ export default function CustomPlayer() {
             {/* ── Minimized Player (Floats above mobile nav) ──────────────── */}
             <div
                 onClickCapture={(e) => { e.preventDefault(); e.stopPropagation(); setIsMinimized(false); }}
-                className={`fixed bottom-[100px] md:bottom-10 left-4 right-4 md:left-auto md:w-[450px] bg-black backdrop-blur-md border border-white/10 border-t-zinc-800 rounded-3xl p-4 flex items-center gap-6 cursor-pointer hover:bg-zinc-900 transition-[transform,opacity,bottom] duration-700 z-[999] shadow-[0_30px_70px_rgba(0,0,0,0.8)] border-b-4 border-b-[#8b5cf6] pointer-events-auto active:scale-[0.98] ${!isMinimized ? 'opacity-0 translate-y-32 pointer-events-none' : 'opacity-100 translate-y-0'}`}
+                className={`fixed bottom-[100px] md:bottom-10 left-4 right-4 md:left-auto md:w-[450px] bg-black backdrop-blur-md border border-white/10 border-t-zinc-800 rounded-3xl p-4 flex items-center gap-6 cursor-pointer hover:bg-zinc-900 transition-[transform,opacity,bottom] duration-700 z-[999] shadow-[0_30px_70px_rgba(0,0,0,0.8)] border-b-4 border-b-[#8b5cf6] pointer-events-auto active:scale-[0.98] ${(!isMinimized || !isPlayerOpen) ? 'opacity-0 translate-y-32 pointer-events-none invisible' : 'opacity-100 translate-y-0 visible'}`}
             >
                 <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-2xl">
                     <Image src={activeVideo.thumbnail} alt={activeVideo.title} fill className="object-cover" />

@@ -53,7 +53,7 @@ export default function Sidebar() {
                 {/* Main Nav */}
                 <nav className="flex flex-col gap-y-8 px-3 mt-4">
                     {navItems.map(({ label, href, icon: Icon, query }) => {
-                        const isActive = searchQuery === query;
+                        const isActive = pathname === href && searchQuery === query;
                         return (
                             <Link
                                 key={label}
@@ -134,12 +134,12 @@ export default function Sidebar() {
 
             {/* ── Mobile Bottom Navigation ──────────────────────────────────── */}
             <div className="md:hidden fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 md:px-6">
-                <nav className="flex items-center justify-evenly gap-2 px-2 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] rounded-[2rem] shadow-2xl w-full max-w-md mx-auto">
+                <nav className="flex items-center justify-around gap-4 px-4 py-2 bg-zinc-950/90 backdrop-blur-2xl border border-white/[0.06] rounded-[2rem] shadow-2xl w-full max-w-md mx-auto">
                     {[
-                        { label: 'Home',    icon: Home,    query: '__HOME__' },
-                        { label: 'Library', icon: Library,  query: '__FAVORITES__' },
-                    ].map(({ label, icon: Icon, query }) => {
-                        const isActive = searchQuery === query;
+                        { label: 'Home',    icon: Home,    href: '/', query: '__HOME__' },
+                        { label: 'Library', icon: Library, href: '/', query: '__FAVORITES__' },
+                    ].map(({ label, href, icon: Icon, query }) => {
+                        const isActive = pathname === href && searchQuery === query;
                         return (
                             <button
                                 key={label}

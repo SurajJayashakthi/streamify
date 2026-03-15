@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useVideoStore } from '@/store/useVideoStore';
 import {
     Home, TrendingUp, Music2, Gamepad2, ThumbsUp, X, Sparkles
@@ -7,14 +8,15 @@ import {
 import { useEffect } from 'react';
 
 const navItems = [
-    { label: 'Home',      icon: Home,      query: '__HOME__' },
-    { label: 'Trending',  icon: TrendingUp, query: 'trending music 2026' },
-    { label: 'Music',     icon: Music2,     query: 'new music 2026' },
-    { label: 'Gaming',    icon: Gamepad2,   query: 'gaming music epic' },
-    { label: 'Favorites', icon: ThumbsUp,   query: '__FAVORITES__' },
+    { label: 'Home',      icon: Home,       href: '/', query: '__HOME__' },
+    { label: 'Trending',  icon: TrendingUp, href: '/', query: 'trending music 2026' },
+    { label: 'Music',     icon: Music2,     href: '/', query: 'new music 2026' },
+    { label: 'Gaming',    icon: Gamepad2,   href: '/', query: 'gaming music epic' },
+    { label: 'Favorites', icon: ThumbsUp,   href: '/', query: '__FAVORITES__' },
 ];
 
 export default function MobileDrawer() {
+    const pathname = usePathname();
     const { isDrawerOpen, setIsDrawerOpen, setSearchQuery, searchQuery } = useVideoStore();
 
     const handleNavClick = (query: string) => {
@@ -61,10 +63,10 @@ export default function MobileDrawer() {
                     </button>
                 </div>
 
-                <nav className="flex flex-col gap-2 px-4 pt-8 flex-1 overflow-y-auto">
+                <nav className="flex flex-col gap-4 px-4 pt-8 flex-1 overflow-y-auto">
                     <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest px-4 mb-4">Menu</p>
-                    {navItems.map(({ label, icon: Icon, query }) => {
-                        const isActive = searchQuery === query;
+                    {navItems.map(({ label, href, icon: Icon, query }) => {
+                        const isActive = pathname === href && searchQuery === query;
                         return (
                             <button
                                 key={label}

@@ -10,7 +10,7 @@ export default function ClientPlayer() {
     return (
         <>
             <Navbar />
-            {isPlayerOpen && <CustomPlayer />}
+            <CustomPlayer />
         </>
     );
 }
