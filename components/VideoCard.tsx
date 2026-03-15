@@ -17,6 +17,7 @@ export default function VideoCard({ video }: VideoCardProps) {
     const { setActiveVideo, favorites, toggleFavorite } = useVideoStore();
     const [isHovered, setIsHovered] = useState(false);
     const progress = getVideoProgress(video.id);
+    const percent = progress && progress.duration > 0 ? (progress.timestamp / progress.duration) * 100 : 0;
 
     const isFavorite = favorites.some((v) => v.id === video.id);
 
@@ -38,11 +39,11 @@ export default function VideoCard({ video }: VideoCardProps) {
                 />
 
                 {/* Progress Bar (OLED Style) */}
-                {progress && progress.percent > 0 && (
+                {percent > 0 && (
                     <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/10 overflow-hidden">
                         <div
                             className="h-full bg-red-600 transition-all duration-300"
-                            style={{ width: `${progress.percent}%` }}
+                            style={{ width: `${percent}%` }}
                         />
                     </div>
                 )}
